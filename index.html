@@ -1,0 +1,628 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+
+    <meta charset="UTF-8">
+
+    <meta
+        name="viewport"
+        content="width=device-width, initial-scale=1.0"
+    >
+
+    <title>Mi Gym</title>
+
+    <link
+        rel="stylesheet"
+        href="style.css"
+    >
+
+</head>
+
+
+<body>
+
+    <h1>Mi Gym</h1>
+
+
+    <!-- ================================================= -->
+    <!-- PANTALLA DE LOGIN -->
+    <!-- ================================================= -->
+
+    <div id="pantallaLogin">
+
+        <h2>Iniciar sesión</h2>
+
+        <input
+            id="email"
+            type="email"
+            placeholder="Tu email"
+        >
+
+        <br><br>
+
+        <input
+            id="password"
+            type="password"
+            placeholder="Tu contraseña"
+        >
+
+        <br><br>
+
+        <button id="registrar">
+            Registrarme
+        </button>
+
+        <button id="iniciarSesion">
+            Iniciar sesión
+        </button>
+
+        <p id="mensaje"></p>
+
+    </div>
+
+
+
+    <!-- ================================================= -->
+    <!-- APLICACIÓN -->
+    <!-- ================================================= -->
+
+    <div
+        id="aplicacion"
+        style="display: none;"
+    >
+
+        <button id="cerrarSesion">
+            Cerrar sesión
+        </button>
+
+        <p id="usuarioActual"></p>
+
+
+
+        <!-- ================================================= -->
+        <!-- PANTALLA DE ENTRENAMIENTOS -->
+        <!-- ================================================= -->
+
+        <div id="pantallaEntrenamientos">
+
+            <h2>Sesión actual</h2>
+
+
+            <!-- EJERCICIOS DE LA SESIÓN -->
+
+            <div id="ejerciciosSesion"></div>
+
+
+            <br>
+
+
+            <!-- AÑADIR EJERCICIO -->
+
+            <button id="anadirEjercicio">
+                ➕ Añadir ejercicio
+            </button>
+
+
+            <br><br>
+
+
+            <!-- MODIFICAR SESIÓN -->
+
+            <button id="modificarSesion">
+                ✏️ Modificar sesión actual
+            </button>
+
+
+            <br><br>
+
+
+            <!-- GUARDAR SESIÓN -->
+
+            <button id="guardarSesion">
+                💾 Guardar sesión
+            </button>
+
+
+            <br><br>
+
+
+            <!-- MIS SESIONES -->
+
+            <button id="verMisSesiones">
+                📚 Mis sesiones
+            </button>
+
+        </div>
+
+
+
+        <!-- ================================================= -->
+        <!-- PANTALLA DE MIS SESIONES -->
+        <!-- ================================================= -->
+
+        <div
+            id="pantallaMisSesiones"
+            style="display: none;"
+        >
+
+            <h2>📚 Mis sesiones</h2>
+
+
+            <button id="volverEntrenamiento">
+                ← Volver al entrenamiento
+            </button>
+
+
+            <br><br>
+
+
+            <div id="resultadoSesiones"></div>
+
+        </div>
+
+
+
+        <!-- ================================================= -->
+        <!-- PANTALLA DE RUTINAS -->
+        <!-- ================================================= -->
+
+        <!-- ======================================== -->
+<!-- PANTALLA DE RUTINAS -->
+<!-- ======================================== -->
+
+<!-- ======================================== -->
+<!-- PANTALLA DE RUTINAS -->
+<!-- ======================================== -->
+
+<div
+    id="pantallaRutinas"
+    style="display: none;"
+>
+
+    <h2>📋 Rutinas</h2>
+
+    <!-- LISTA DE RUTINAS -->
+
+    <div id="listaRutinas"></div>
+
+
+    <br>
+
+
+    <!-- CREAR RUTINA -->
+
+    <button id="crearRutina">
+        ➕ Crear rutina
+    </button>
+
+
+    <!-- FORMULARIO -->
+
+    <div
+        id="formularioRutina"
+        style="display: none;"
+    >
+
+        <h3>Nueva rutina</h3>
+
+        <input
+            id="nombreRutina"
+            type="text"
+            placeholder="Nombre de la rutina"
+        >
+
+        <br><br>
+
+        <button id="guardarRutina">
+            💾 Guardar rutina
+        </button>
+
+        <button id="cancelarRutina">
+            ❌ Cancelar
+        </button>
+
+        <p id="mensajeRutina"></p>
+
+    </div>
+
+
+    <!-- ======================================== -->
+    <!-- DETALLE DE UNA RUTINA -->
+    <!-- ======================================== -->
+
+    <div
+        id="detalleRutina"
+        style="display: none;"
+    >
+
+        <button id="volverRutinas">
+            ← Volver a rutinas
+        </button>
+
+        <h3 id="tituloRutina"></h3>
+
+        <div id="ejerciciosRutina"></div>
+
+        <br>
+
+        <button id="anadirEjercicioRutina">
+            ➕ Añadir ejercicio
+        </button>
+
+    </div>
+
+
+    <!-- ======================================== -->
+    <!-- FORMULARIO AÑADIR EJERCICIO -->
+    <!-- ======================================== -->
+
+    <div
+        id="formularioEjercicioRutina"
+        style="display: none;"
+    >
+
+        <h3>Añadir ejercicio</h3>
+
+        <select id="selectEjercicioRutina">
+
+            <option value="">
+                Selecciona un ejercicio
+            </option>
+
+        </select>
+
+        <br><br>
+
+        <input
+            id="seriesObjetivo"
+            type="number"
+            min="1"
+            placeholder="Series"
+        >
+
+        <input
+            id="repeticionesObjetivo"
+            type="number"
+            min="1"
+            placeholder="Repeticiones"
+        >
+
+        <br><br>
+
+        <button id="guardarEjercicioRutina">
+            💾 Añadir ejercicio
+        </button>
+
+        <button id="cancelarEjercicioRutina">
+            ❌ Cancelar
+        </button>
+
+        <p id="mensajeEjercicioRutina"></p>
+
+    </div>
+
+</div>
+
+
+
+        <!-- ================================================= -->
+        <!-- PANTALLA DE PROGRESO -->
+        <!-- ================================================= -->
+
+        <div
+            id="pantallaProgreso"
+            style="display: none;"
+        >
+
+            <h2>📈 Progreso</h2>
+
+
+
+            <!-- ================================================= -->
+            <!-- CALENDARIO SEMANAL -->
+            <!-- ================================================= -->
+
+            <div id="calendarioSemana">
+
+                <h3>📅 Esta semana</h3>
+
+
+                <div id="diasSemana"></div>
+
+
+                <p id="entrenamientosSemana">
+                    0 entrenamientos
+                </p>
+
+
+                <button id="verCalendario">
+                    🗓️ Ver calendario completo
+                </button>
+
+            </div>
+
+
+
+            <!-- ================================================= -->
+            <!-- CALENDARIO MENSUAL -->
+            <!-- ================================================= -->
+
+            <div
+                id="calendarioMensual"
+                style="display: none;"
+            >
+
+                <br>
+
+
+                <div>
+
+                    <button id="mesAnterior">
+                        ◀
+                    </button>
+
+
+                    <strong id="mesActual">
+                    </strong>
+
+
+                    <button id="mesSiguiente">
+                        ▶
+                    </button>
+
+                </div>
+
+
+                <br>
+
+
+                <div id="calendario"></div>
+
+
+                <br>
+
+
+                <button id="cerrarCalendario">
+                    ← Volver a progreso
+                </button>
+
+
+                <br><br>
+
+
+                <!--
+                    Aquí aparecerá la sesión
+                    cuando pulsemos un día entrenado.
+                -->
+
+                <div id="detalleDia"></div>
+
+            </div>
+
+
+
+            <!-- ================================================= -->
+            <!-- SERIES POR GRUPO MUSCULAR -->
+            <!-- ================================================= -->
+
+            <div id="progresoMusculos">
+
+                <h3>
+                    💪 Series por grupo muscular
+                </h3>
+
+
+                <p>
+                    Aquí podrás ver cuántas series
+                    has hecho de cada grupo muscular.
+                </p>
+
+
+                <!--
+                    Los grupos principales serán:
+
+                    Gemelos
+                    Cuádriceps
+                    Bíceps femoral
+                    Abdominales
+                    Pecho
+                    Espalda
+                    Bíceps
+                    Tríceps
+                    Antebrazo
+                    Glúteo
+                    Hombro
+
+                    Al pulsar uno se mostrarán
+                    los músculos pertenecientes
+                    a ese grupo.
+                -->
+
+                <div id="listaGruposMusculares"></div>
+
+
+                <div id="detalleGrupoMuscular"></div>
+
+            </div>
+
+
+
+            <!-- ================================================= -->
+            <!-- GRÁFICA PRINCIPAL: VOLUMEN POR EJERCICIO -->
+            <!-- ================================================= -->
+
+            <div id="progresoVolumen">
+
+                <h3>
+                    📊 Progreso de volumen
+                </h3>
+
+
+                <p>
+                    Selecciona un ejercicio para
+                    ver cómo ha evolucionado su
+                    volumen a lo largo de tus sesiones.
+                </p>
+
+
+                <select id="selectorEjercicioVolumen">
+
+                    <option value="">
+                        Selecciona un ejercicio
+                    </option>
+
+                </select>
+
+
+                <div id="mensajeVolumen"></div>
+
+
+                <div
+                    id="contenedorGraficaVolumen"
+                    style="width: 100%;"
+                >
+
+                    <canvas
+                        id="graficaVolumen"
+                    >
+                    </canvas>
+
+                </div>
+
+            </div>
+
+
+
+            <!-- ================================================= -->
+            <!-- GRÁFICA DE PR -->
+            <!-- ================================================= -->
+
+            <div id="progresoPR">
+
+                <h3>
+                    🏆 Progreso de PR
+                </h3>
+
+
+                <p>
+                    Aquí podrás ver la evolución
+                    de tus mejores marcas.
+                </p>
+
+
+                <select id="selectorEjercicioPR">
+
+                    <option value="">
+                        Selecciona un ejercicio
+                    </option>
+
+                </select>
+
+
+                <div id="mensajePR"></div>
+
+
+                <div
+                    id="contenedorGraficaPR"
+                    style="width: 100%;"
+                >
+
+                    <canvas
+                        id="graficaPR"
+                    >
+                    </canvas>
+
+                </div>
+
+            </div>
+
+
+
+            <!-- ================================================= -->
+            <!-- GRÁFICA DE SESIONES POR MES -->
+            <!-- ================================================= -->
+
+            <div id="progresoSesiones">
+
+                <h3>
+                    📅 Sesiones por mes
+                </h3>
+
+
+                <p>
+                    Número de entrenamientos
+                    realizados cada mes.
+                </p>
+
+
+                <div
+                    id="contenedorGraficaSesiones"
+                    style="width: 100%;"
+                >
+
+                    <canvas
+                        id="graficaSesiones"
+                    >
+                    </canvas>
+
+                </div>
+
+            </div>
+
+
+        </div>
+
+
+
+        <!-- ================================================= -->
+        <!-- NAVEGACIÓN -->
+        <!-- ================================================= -->
+
+        <nav id="navegacion">
+
+            <button id="navEntrenamientos">
+                🏋️ Entrenos
+            </button>
+
+
+            <button id="navRutinas">
+                📋 Rutinas
+            </button>
+
+
+            <button id="navProgreso">
+                📈 Progreso
+            </button>
+
+        </nav>
+
+    </div>
+
+
+
+    <!-- ================================================= -->
+    <!-- SUPABASE -->
+    <!-- ================================================= -->
+
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2">
+    </script>
+
+
+    <!-- ================================================= -->
+    <!-- CHART.JS -->
+    <!-- ================================================= -->
+
+    <script src="https://cdn.jsdelivr.net/npm/chart.js">
+    </script>
+
+
+    <!-- ================================================= -->
+    <!-- APP.JS -->
+    <!-- ================================================= -->
+
+    <script src="app.js"></script>
+
+</body>
+
+</html>
