@@ -86,6 +86,19 @@ const modificarSesion =
         "modificarSesion"
     );
 
+// Solo se muestra cuando hay una sesión activa.
+modificarSesion.style.display = "none";
+
+function actualizarBotonModificarSesion() {
+
+    if (!modificarSesion) {
+        return;
+    }
+
+    modificarSesion.style.display =
+        sesionActualId ? "inline-block" : "none";
+}
+
 const guardarSesion =
     document.getElementById(
         "guardarSesion"
@@ -520,6 +533,8 @@ botonCerrarSesion.addEventListener(
             "sesionActualId"
         );
 
+        actualizarBotonModificarSesion();
+
         ejerciciosSesion.innerHTML =
             "";
 
@@ -690,6 +705,8 @@ async function crearSesionActual() {
             sesionActualId
         )
     );
+
+    actualizarBotonModificarSesion();
 
     return true;
 }
@@ -1968,6 +1985,8 @@ guardarSesion.addEventListener(
         sesionActualId =
             null;
 
+        actualizarBotonModificarSesion();
+
         ejerciciosSesion.innerHTML =
             "";
 
@@ -2060,6 +2079,8 @@ async function recuperarSesionActual() {
         sesionActualId =
             null;
 
+        actualizarBotonModificarSesion();
+
         return;
     }
 
@@ -2080,6 +2101,8 @@ async function recuperarSesionActual() {
 
         sesionActualId =
             null;
+
+        actualizarBotonModificarSesion();
 
         return;
     }
@@ -2137,12 +2160,16 @@ async function recuperarSesionActual() {
         sesionActualId =
             null;
 
+        actualizarBotonModificarSesion();
+
         return;
     }
 
 
     sesionActualId =
         sesion.id;
+
+    actualizarBotonModificarSesion();
 
 
     // Recuperar ejercicios.
@@ -2198,6 +2225,8 @@ async function recuperarSesionActual() {
             bloque
         );
     }
+
+    actualizarBotonModificarSesion();
 }
 
 
@@ -3654,9 +3683,14 @@ function mostrarSemana() {
                 "div"
             );
 
+        marca.className =
+            entrenado
+                ? "marcaEntrenamiento"
+                : "sinEntrenamiento";
+
         marca.textContent =
             entrenado
-                ? "●"
+                ? "🔥"
                 : "·";
 
 
@@ -3890,9 +3924,14 @@ function mostrarCalendarioMensual() {
             "1% 0";
 
 
+        elemento.className =
+            entrenado
+                ? "diaCalendario diaEntrenado"
+                : "diaCalendario";
+
         elemento.textContent =
             entrenado
-                ? dia + " ●"
+                ? dia + " 🔥"
                 : dia;
 
 
@@ -4117,6 +4156,213 @@ mesSiguiente.addEventListener(
 );
 
 // ============================================================
+// FILTRO DE TIEMPO PARA SERIES MUSCULARES
+// ============================================================
+
+let periodoSeriesMusculares = "semana";
+let fechaInicioSeriesPersonalizada = "";
+let fechaFinSeriesPersonalizada = "";
+
+function obtenerRangoSeriesMusculares() {
+
+    const ahora = new Date();
+    let inicio;
+    let fin;
+
+    if (periodoSeriesMusculares === "semana") {
+
+        inicio = new Date(ahora);
+        const dia = inicio.getDay();
+        const diferencia = dia === 0 ? -6 : 1 - dia;
+        inicio.setDate(inicio.getDate() + diferencia);
+        inicio.setHours(0, 0, 0, 0);
+
+        fin = new Date(inicio);
+        fin.setDate(fin.getDate() + 7);
+
+    } else if (periodoSeriesMusculares === "mes") {
+
+        inicio = new Date(
+            ahora.getFullYear(),
+            ahora.getMonth(),
+            1,
+            0, 0, 0, 0
+        );
+
+        fin = new Date(
+            ahora.getFullYear(),
+            ahora.getMonth() + 1,
+            1,
+            0, 0, 0, 0
+        );
+
+    } else if (periodoSeriesMusculares === "año") {
+
+        inicio = new Date(
+            ahora.getFullYear(),
+            0,
+            1,
+            0, 0, 0, 0
+        );
+
+        fin = new Date(
+            ahora.getFullYear() + 1,
+            0,
+            1,
+            0, 0, 0, 0
+        );
+
+    } else {
+
+        if (!fechaInicioSeriesPersonalizada || !fechaFinSeriesPersonalizada) {
+            return null;
+        }
+
+        inicio = new Date(
+            fechaInicioSeriesPersonalizada + "T00:00:00"
+        );
+
+        fin = new Date(
+            fechaFinSeriesPersonalizada + "T00:00:00"
+        );
+
+        if (isNaN(inicio.getTime()) || isNaN(fin.getTime())) {
+            return null;
+        }
+
+        fin.setDate(fin.getDate() + 1);
+    }
+
+    return {
+        inicio: inicio.toISOString(),
+        fin: fin.toISOString()
+    };
+}
+
+
+// ============================================================
+// CONTROLES DEL PERIODO
+// ============================================================
+
+function prepararFiltroSeriesMusculares() {
+
+    if (!progresoMusculos) {
+        return;
+    }
+
+    let controles = document.getElementById(
+        "filtroSeriesMusculares"
+    );
+
+    if (controles) {
+        return;
+    }
+
+    controles = document.createElement("div");
+    controles.id = "filtroSeriesMusculares";
+
+    const etiqueta = document.createElement("strong");
+    etiqueta.textContent = "Periodo:";
+    controles.appendChild(etiqueta);
+
+    const select = document.createElement("select");
+    select.id = "selectorPeriodoSeries";
+
+    [
+        ["semana", "Esta semana"],
+        ["mes", "Este mes"],
+        ["año", "Este año"],
+        ["personalizado", "Personalizado"]
+    ].forEach(function(opcionData) {
+
+        const opcion = document.createElement("option");
+        opcion.value = opcionData[0];
+        opcion.textContent = opcionData[1];
+        select.appendChild(opcion);
+    });
+
+    select.value = periodoSeriesMusculares;
+    controles.appendChild(select);
+
+    const personalizado = document.createElement("div");
+    personalizado.id = "rangoPersonalizadoSeries";
+    personalizado.style.display = "none";
+
+    const desde = document.createElement("input");
+    desde.type = "date";
+    desde.id = "fechaInicioSeries";
+
+    const hasta = document.createElement("input");
+    hasta.type = "date";
+    hasta.id = "fechaFinSeries";
+
+    const etiquetaDesde = document.createElement("label");
+    etiquetaDesde.textContent = "Desde";
+    etiquetaDesde.htmlFor = "fechaInicioSeries";
+
+    const etiquetaHasta = document.createElement("label");
+    etiquetaHasta.textContent = "Hasta";
+    etiquetaHasta.htmlFor = "fechaFinSeries";
+
+    personalizado.appendChild(etiquetaDesde);
+    personalizado.appendChild(desde);
+    personalizado.appendChild(etiquetaHasta);
+    personalizado.appendChild(hasta);
+
+    controles.appendChild(personalizado);
+
+    const aplicar = document.createElement("button");
+    aplicar.type = "button";
+    aplicar.id = "aplicarRangoSeries";
+    aplicar.textContent = "Aplicar fechas";
+    aplicar.style.display = "none";
+    controles.appendChild(aplicar);
+
+    progresoMusculos.insertBefore(
+        controles,
+        listaGruposMusculares
+    );
+
+    select.addEventListener("change", async function() {
+
+        periodoSeriesMusculares = select.value;
+
+        personalizado.style.display =
+            periodoSeriesMusculares === "personalizado"
+                ? "block"
+                : "none";
+
+        aplicar.style.display =
+            periodoSeriesMusculares === "personalizado"
+                ? "inline-block"
+                : "none";
+
+        if (periodoSeriesMusculares !== "personalizado") {
+            await cargarGruposMusculares();
+        }
+    });
+
+    aplicar.addEventListener("click", async function() {
+
+        if (!desde.value || !hasta.value) {
+            alert("Selecciona las dos fechas.");
+            return;
+        }
+
+        if (desde.value > hasta.value) {
+            alert("La fecha inicial no puede ser posterior a la final.");
+            return;
+        }
+
+        fechaInicioSeriesPersonalizada = desde.value;
+        fechaFinSeriesPersonalizada = hasta.value;
+
+        await cargarGruposMusculares();
+    });
+}
+
+
+// ============================================================
 // PROGRESO - CARGAR GRUPOS MUSCULARES
 // ============================================================
 
@@ -4126,227 +4372,115 @@ async function cargarGruposMusculares() {
         return;
     }
 
+    prepararFiltroSeriesMusculares();
+
+    const rango = obtenerRangoSeriesMusculares();
+
+    if (!rango) {
+        listaGruposMusculares.textContent =
+            "Selecciona un rango de fechas válido.";
+        return;
+    }
+
     listaGruposMusculares.innerHTML = "";
 
-    // Cargamos directamente los grupos que existen
-    // en la base de datos.
     const {
         data: musculos,
         error
     } = await supabaseClient
         .from("Musculos")
         .select("id, nombre, grupo")
-        .order("grupo", {
-            ascending: true
-        })
-        .order("nombre", {
-            ascending: true
-        });
+        .order("grupo", { ascending: true })
+        .order("nombre", { ascending: true });
 
     if (error) {
-
-        console.error(
-            "Error cargando grupos musculares:",
-            error
-        );
-
+        console.error("Error cargando grupos musculares:", error);
         listaGruposMusculares.textContent =
             "No se pudieron cargar los grupos musculares.";
-
         return;
     }
 
     if (!musculos || musculos.length === 0) {
-
         listaGruposMusculares.textContent =
             "No hay músculos registrados.";
-
         return;
     }
 
-    // Agrupar músculos por grupo
     const grupos = {};
 
     musculos.forEach(function(musculo) {
-
         if (!grupos[musculo.grupo]) {
             grupos[musculo.grupo] = [];
         }
-
         grupos[musculo.grupo].push(musculo);
     });
 
-    // Mostrar cada grupo
     Object.keys(grupos).forEach(function(grupo) {
 
-        const bloque =
-            document.createElement("div");
+        const bloque = document.createElement("div");
+        bloque.className = "grupoMuscular";
+        bloque.dataset.grupo = grupo;
 
-        bloque.className =
-            "grupoMuscular";
+        const boton = document.createElement("button");
+        boton.type = "button";
+        boton.className = "botonGrupoMuscular";
 
-        bloque.dataset.grupo =
-            grupo;
+        const nombre = document.createElement("strong");
+        nombre.textContent = grupo;
 
-
-        // ----------------------------------------------------
-        // BOTÓN DEL GRUPO
-        // ----------------------------------------------------
-
-        const boton =
-            document.createElement("button");
-
-        boton.type =
-            "button";
-
-        boton.className =
-            "botonGrupoMuscular";
-
-
-        const nombre =
-            document.createElement("strong");
-
-        nombre.textContent =
-            grupo;
-
-
-        const series =
-            document.createElement("span");
-
-        series.className =
-            "seriesGrupo";
-
-        series.textContent =
-            "Cargando...";
-
+        const series = document.createElement("span");
+        series.className = "seriesGrupo";
+        series.textContent = "Cargando...";
 
         boton.appendChild(nombre);
         boton.appendChild(series);
 
-
-        // ----------------------------------------------------
-        // DETALLE DE LOS MÚSCULOS
-        // ----------------------------------------------------
-
-        const detalle =
-            document.createElement("div");
-
-        detalle.className =
-            "detalleGrupoMuscular";
-
-        detalle.style.display =
-            "none";
-
+        const detalle = document.createElement("div");
+        detalle.className = "detalleGrupoMuscular";
+        detalle.style.display = "none";
 
         grupos[grupo].forEach(function(musculo) {
 
-    const elemento =
-        document.createElement("div");
+            const elemento = document.createElement("div");
+            elemento.className = "musculoDetalle";
 
-    elemento.className =
-        "musculoDetalle";
+            const nombreMusculo = document.createElement("span");
+            nombreMusculo.textContent = musculo.nombre;
 
-    elemento.style.display =
-        "flex";
+            const seriesMusculo = document.createElement("span");
+            seriesMusculo.className = "seriesMusculo";
+            seriesMusculo.textContent = "Cargando...";
 
-    elemento.style.justifyContent =
-        "space-between";
+            elemento.appendChild(nombreMusculo);
+            elemento.appendChild(seriesMusculo);
+            detalle.appendChild(elemento);
 
-    elemento.style.alignItems =
-        "center";
-
-
-    // Nombre del músculo
-    const nombreMusculo =
-        document.createElement("span");
-
-    nombreMusculo.textContent =
-        musculo.nombre;
-
-
-    // Número de series
-    const seriesMusculo =
-        document.createElement("span");
-
-    seriesMusculo.className =
-        "seriesMusculo";
-
-    seriesMusculo.textContent =
-        "Cargando...";
-
-
-    elemento.appendChild(
-        nombreMusculo
-    );
-
-    elemento.appendChild(
-        seriesMusculo
-    );
-
-    detalle.appendChild(
-        elemento
-    );
-
-
-    // Calcular las series de este músculo
-    cargarTotalSeriesMusculo(
-        musculo.id,
-        seriesMusculo
-    );
-
-});
-
-
-        // ----------------------------------------------------
-        // AÑADIR AL HTML
-        // ----------------------------------------------------
+            cargarTotalSeriesMusculo(
+                musculo.id,
+                seriesMusculo,
+                rango
+            );
+        });
 
         bloque.appendChild(boton);
         bloque.appendChild(detalle);
-
         listaGruposMusculares.appendChild(bloque);
 
-
-        // ----------------------------------------------------
-        // ABRIR / CERRAR GRUPO
-        // ----------------------------------------------------
-
-        boton.addEventListener(
-            "click",
-            function() {
-
-                if (
-                    detalle.style.display ===
-                    "none"
-                ) {
-
-                    detalle.style.display =
-                        "block";
-
-                } else {
-
-                    detalle.style.display =
-                        "none";
-                }
-            }
-        );
-
-
-        // ----------------------------------------------------
-        // TOTAL DE SERIES DEL GRUPO
-        // ----------------------------------------------------
+        boton.addEventListener("click", function() {
+            detalle.style.display =
+                detalle.style.display === "none"
+                    ? "block"
+                    : "none";
+        });
 
         cargarTotalSeriesGrupo(
             grupo,
-            series
+            series,
+            rango
         );
-
     });
 }
 
-// ============================================================
-// TOTAL SERIES DE UN GRUPO
-// ============================================================
 
 // ============================================================
 // TOTAL SERIES DE UN GRUPO
@@ -4354,185 +4488,122 @@ async function cargarGruposMusculares() {
 
 async function cargarTotalSeriesGrupo(
     grupo,
-    elemento
+    elemento,
+    rango
 ) {
 
     try {
 
         elemento.textContent = "Cargando...";
 
-
-        // ----------------------------------------------------
-        // 1. Buscar músculos del grupo
-        // ----------------------------------------------------
-
         const {
             data: musculos,
             error: musculosError
-        } =
-            await supabaseClient
-                .from("Musculos")
-                .select("id")
-                .eq("grupo", grupo);
-
+        } = await supabaseClient
+            .from("Musculos")
+            .select("id")
+            .eq("grupo", grupo);
 
         if (musculosError) {
             throw musculosError;
         }
 
-
-        if (
-            !musculos ||
-            musculos.length === 0
-        ) {
-
-            elemento.textContent =
-                "0 series";
-
+        if (!musculos || musculos.length === 0) {
+            elemento.textContent = "0 series";
             return;
         }
 
-
-        const musculoIds =
-            musculos.map(
-                function(musculo) {
-                    return musculo.id;
-                }
-            );
-
-
-        // ----------------------------------------------------
-        // 2. Buscar ejercicios que trabajan esos músculos
-        // ----------------------------------------------------
+        const musculoIds = musculos.map(function(musculo) {
+            return musculo.id;
+        });
 
         const {
             data: relaciones,
             error: relacionesError
-        } =
-            await supabaseClient
-                .from("Ejercicio_Musculos")
-                .select("ejercicio_id")
-                .in(
-                    "musculo_id",
-                    musculoIds
-                );
-
+        } = await supabaseClient
+            .from("Ejercicio_Musculos")
+            .select("ejercicio_id")
+            .in("musculo_id", musculoIds);
 
         if (relacionesError) {
             throw relacionesError;
         }
 
-
-        if (
-            !relaciones ||
-            relaciones.length === 0
-        ) {
-
-            elemento.textContent =
-                "0 series";
-
+        if (!relaciones || relaciones.length === 0) {
+            elemento.textContent = "0 series";
             return;
         }
 
+        const ejercicioIds = [
+            ...new Set(
+                relaciones.map(function(relacion) {
+                    return relacion.ejercicio_id;
+                })
+            )
+        ];
 
-        const ejercicioIds =
-            [
-                ...new Set(
-                    relaciones.map(
-                        function(relacion) {
-                            return relacion.ejercicio_id;
-                        }
-                    )
-                )
-            ];
+        const {
+            data: sesiones,
+            error: sesionesError
+        } = await supabaseClient
+            .from("Sesiones")
+            .select("id")
+            .gte("created_at", rango.inicio)
+            .lt("created_at", rango.fin)
+            .neq("id", Number(sesionActualId) || -1);
 
+        if (sesionesError) {
+            throw sesionesError;
+        }
 
-        // ----------------------------------------------------
-        // 3. Buscar ejercicios realizados en sesiones
-        // ----------------------------------------------------
+        if (!sesiones || sesiones.length === 0) {
+            elemento.textContent = "0 series";
+            return;
+        }
+
+        const sesionIds = sesiones.map(function(sesion) {
+            return sesion.id;
+        });
 
         const {
             data: sesionesEjercicios,
             error: sesionesEjerciciosError
-        } =
-            await supabaseClient
-                .from("Sesion_Ejercicios")
-                .select("id")
-                .in(
-                    "ejercicio_id",
-                    ejercicioIds
-                );
-
+        } = await supabaseClient
+            .from("Sesion_Ejercicios")
+            .select("id")
+            .in("ejercicio_id", ejercicioIds)
+            .in("sesion_id", sesionIds);
 
         if (sesionesEjerciciosError) {
             throw sesionesEjerciciosError;
         }
 
-
-        if (
-            !sesionesEjercicios ||
-            sesionesEjercicios.length === 0
-        ) {
-
-            elemento.textContent =
-                "0 series";
-
+        if (!sesionesEjercicios || sesionesEjercicios.length === 0) {
+            elemento.textContent = "0 series";
             return;
         }
 
-
-        const sesionEjercicioIds =
-            sesionesEjercicios.map(
-                function(item) {
-                    return item.id;
-                }
-            );
-
-
-        // ----------------------------------------------------
-        // 4. Contar todas las series
-        // ----------------------------------------------------
+        const sesionEjercicioIds = sesionesEjercicios.map(function(item) {
+            return item.id;
+        });
 
         const {
             count,
             error: seriesError
-        } =
-            await supabaseClient
-                .from("Series")
-                .select(
-                    "id",
-                    {
-                        count: "exact",
-                        head: true
-                    }
-                )
-                .in(
-                    "sesion_ejercicio_id",
-                    sesionEjercicioIds
-                );
-
+        } = await supabaseClient
+            .from("Series")
+            .select("id", { count: "exact", head: true })
+            .in("sesion_ejercicio_id", sesionEjercicioIds);
 
         if (seriesError) {
             throw seriesError;
         }
 
-
-        // ----------------------------------------------------
-        // 5. Mostrar resultado
-        // ----------------------------------------------------
-
-        const total =
-            count || 0;
-
+        const total = count || 0;
 
         elemento.textContent =
             total +
-            (
-                total === 1
-                    ? " serie"
-                    : " series"
-            );
-
+            (total === 1 ? " serie" : " series");
 
     } catch (error) {
 
@@ -4542,8 +4613,7 @@ async function cargarTotalSeriesGrupo(
             error
         );
 
-        elemento.textContent =
-            "Error";
+        elemento.textContent = "Error";
     }
 }
 
@@ -4553,7 +4623,8 @@ async function cargarTotalSeriesGrupo(
 
 async function cargarTotalSeriesMusculo(
     musculoId,
-    elemento
+    elemento,
+    rango
 ) {
 
     try {
@@ -4601,20 +4672,39 @@ async function cargarTotalSeriesMusculo(
 
 
         const {
-            data: sesionesEjercicios,
+            data: sesiones,
             error: sesionesError
-        } =
-            await supabaseClient
-                .from("Sesion_Ejercicios")
-                .select("id")
-                .in(
-                    "ejercicio_id",
-                    ejercicioIds
-                );
-
+        } = await supabaseClient
+            .from("Sesiones")
+            .select("id")
+            .gte("created_at", rango.inicio)
+            .lt("created_at", rango.fin)
+            .neq("id", Number(sesionActualId) || -1);
 
         if (sesionesError) {
             throw sesionesError;
+        }
+
+        if (!sesiones || sesiones.length === 0) {
+            elemento.textContent = "0 series";
+            return;
+        }
+
+        const sesionIds = sesiones.map(function(sesion) {
+            return sesion.id;
+        });
+
+        const {
+            data: sesionesEjercicios,
+            error: sesionesEjerciciosError
+        } = await supabaseClient
+            .from("Sesion_Ejercicios")
+            .select("id")
+            .in("ejercicio_id", ejercicioIds)
+            .in("sesion_id", sesionIds);
+
+        if (sesionesEjerciciosError) {
+            throw sesionesEjerciciosError;
         }
 
 
@@ -5881,6 +5971,8 @@ async function cargarProgreso() {
 
     prepararSelectsProgreso();
 
+    prepararFiltroSeriesMusculares();
+
     await cargarGruposMusculares();
 
     await cargarGraficaSesiones();
@@ -6071,6 +6163,9 @@ const volverRutinas =
 
 const anadirEjercicioRutina =
     document.getElementById("anadirEjercicioRutina");
+
+// ID de la rutina que estamos viendo actualmente.
+let rutinaActualId = null;
 // ============================================================
 // MOSTRAR FORMULARIO DE CREAR RUTINA
 // ============================================================
@@ -6665,6 +6760,634 @@ bloque.appendChild(
 );
 
 // ============================================================
+// ORDENAR EJERCICIOS DE LA RUTINA
+// ============================================================
+
+let estadoArrastreRutina = {
+    tarjeta: null,
+    punteroId: null,
+    activo: false,
+    movido: false,
+    inicioX: 0,
+    inicioY: 0,
+    offsetX: 0,
+    offsetY: 0,
+    placeholder: null,
+    ordenOriginal: []
+};
+
+
+// ============================================================
+// GUARDAR EL ORDEN DE LA RUTINA
+// ============================================================
+
+async function guardarOrdenRutina() {
+
+    if (!ejerciciosRutina) {
+        return true;
+    }
+
+    const tarjetas = Array.from(
+        ejerciciosRutina.querySelectorAll(
+            ".ejercicioRutina[data-id]"
+        )
+    );
+
+    // Primero ponemos órdenes temporales negativos.
+    // Así evitamos problemas si la tabla tiene una restricción
+    // de valores únicos sobre el campo "orden".
+    for (let i = 0; i < tarjetas.length; i++) {
+
+        const id = tarjetas[i].dataset.id;
+
+        const { error } =
+            await supabaseClient
+                .from("Rutina_Ejercicios")
+                .update({
+                    orden: -(i + 1)
+                })
+                .eq("id", id);
+
+        if (error) {
+
+            console.error(
+                "Error preparando el nuevo orden:",
+                error
+            );
+
+            return false;
+        }
+    }
+
+    // Ahora escribimos el orden definitivo.
+    for (let i = 0; i < tarjetas.length; i++) {
+
+        const id = tarjetas[i].dataset.id;
+
+        const { error } =
+            await supabaseClient
+                .from("Rutina_Ejercicios")
+                .update({
+                    orden: i + 1
+                })
+                .eq("id", id);
+
+        if (error) {
+
+            console.error(
+                "Error guardando el orden:",
+                error
+            );
+
+            return false;
+        }
+    }
+
+    return true;
+}
+
+
+// ============================================================
+// LIMPIAR ARRASTRE
+// ============================================================
+
+function limpiarArrastreRutina() {
+
+    const estado = estadoArrastreRutina;
+
+    if (estado.tarjeta) {
+
+        try {
+            if (
+                estado.punteroId !== null &&
+                estado.tarjeta.hasPointerCapture(
+                    estado.punteroId
+                )
+            ) {
+                estado.tarjeta.releasePointerCapture(
+                    estado.punteroId
+                );
+            }
+        } catch (error) {
+            // No hacemos nada.
+        }
+    }
+
+    if (estado.placeholder) {
+        estado.placeholder.remove();
+    }
+
+    if (estado.tarjeta) {
+        estado.tarjeta.classList.remove(
+            "arrastrando"
+        );
+        estado.tarjeta.style.opacity = "";
+        estado.tarjeta.style.cursor = "grab";
+        estado.tarjeta.style.zIndex = "";
+        estado.tarjeta.style.position = "";
+        estado.tarjeta.style.left = "";
+        estado.tarjeta.style.top = "";
+        estado.tarjeta.style.width = "";
+        estado.tarjeta.style.height = "";
+        estado.tarjeta.style.pointerEvents = "";
+        estado.tarjeta.style.transform = "";
+    }
+
+    estado.tarjeta = null;
+    estado.punteroId = null;
+    estado.activo = false;
+    estado.movido = false;
+    estado.inicioX = 0;
+    estado.inicioY = 0;
+    estado.offsetX = 0;
+    estado.offsetY = 0;
+    estado.placeholder = null;
+    estado.ordenOriginal = [];
+}
+
+
+// ============================================================
+// MOVER EL HUECO DURANTE EL ARRASTRE
+// ============================================================
+
+function moverTarjetaRutina(evento) {
+
+    const estado = estadoArrastreRutina;
+
+    if (
+        !estado.activo ||
+        !estado.tarjeta ||
+        !estado.placeholder
+    ) {
+        return;
+    }
+
+    const tarjetas = Array.from(
+        ejerciciosRutina.querySelectorAll(
+            ".ejercicioRutina[data-id]"
+        )
+    ).filter(function(item) {
+        return item !== estado.tarjeta;
+    });
+
+    let tarjetaDestino = null;
+
+    for (let i = 0; i < tarjetas.length; i++) {
+
+        const rect =
+            tarjetas[i].getBoundingClientRect();
+
+        const mitad =
+            rect.top + rect.height / 2;
+
+        if (evento.clientY < mitad) {
+            tarjetaDestino = tarjetas[i];
+            break;
+        }
+    }
+
+    if (tarjetaDestino) {
+        ejerciciosRutina.insertBefore(
+            estado.placeholder,
+            tarjetaDestino
+        );
+    } else {
+        ejerciciosRutina.appendChild(
+            estado.placeholder
+        );
+    }
+
+    estado.tarjeta.style.left =
+        (evento.clientX - estado.offsetX) + "px";
+
+    estado.tarjeta.style.top =
+        (evento.clientY - estado.offsetY) + "px";
+}
+
+
+// ============================================================
+// INICIAR ARRASTRE
+// ============================================================
+
+function iniciarArrastreRutina(evento, tarjeta) {
+
+    const estado = estadoArrastreRutina;
+
+    if (
+        estado.activo ||
+        !tarjeta
+    ) {
+        return;
+    }
+
+    const rect = tarjeta.getBoundingClientRect();
+
+    estado.tarjeta = tarjeta;
+    estado.punteroId = evento.pointerId;
+    estado.activo = true;
+    estado.movido = false;
+
+    estado.offsetX =
+        evento.clientX - rect.left;
+
+    estado.offsetY =
+        evento.clientY - rect.top;
+
+    const tarjetas = Array.from(
+        ejerciciosRutina.querySelectorAll(
+            ".ejercicioRutina[data-id]"
+        )
+    );
+
+    estado.ordenOriginal =
+        tarjetas.map(function(item) {
+            return item.dataset.id;
+        });
+
+    const placeholder =
+        document.createElement("div");
+
+    placeholder.className =
+        "placeholderEjercicioRutina";
+
+    placeholder.style.height =
+        rect.height + "px";
+
+    placeholder.style.width =
+        rect.width + "px";
+
+    const estilo =
+        getComputedStyle(tarjeta);
+
+    placeholder.style.marginTop =
+        estilo.marginTop;
+
+    placeholder.style.marginRight =
+        estilo.marginRight;
+
+    placeholder.style.marginBottom =
+        estilo.marginBottom;
+
+    placeholder.style.marginLeft =
+        estilo.marginLeft;
+
+    estado.placeholder = placeholder;
+
+    tarjeta.parentNode.insertBefore(
+        placeholder,
+        tarjeta
+    );
+
+    tarjeta.classList.add("arrastrando");
+
+    // Nunca hacemos la tarjeta transparente/gris.
+    tarjeta.style.opacity = "1";
+    tarjeta.style.cursor = "grabbing";
+    tarjeta.style.zIndex = "1000";
+    tarjeta.style.position = "fixed";
+    tarjeta.style.left = rect.left + "px";
+    tarjeta.style.top = rect.top + "px";
+    tarjeta.style.width = rect.width + "px";
+    tarjeta.style.height = rect.height + "px";
+    tarjeta.style.pointerEvents = "none";
+
+    try {
+        tarjeta.setPointerCapture(
+            evento.pointerId
+        );
+    } catch (error) {
+        console.error(
+            "No se pudo capturar el puntero:",
+            error
+        );
+    }
+}
+
+
+// ============================================================
+// PREPARAR ARRASTRE DE UNA TARJETA
+// ============================================================
+
+function prepararArrastreRutina(tarjeta) {
+
+    tarjeta.draggable = false;
+    tarjeta.style.cursor = "grab";
+
+    // En móvil solamente el pequeño asa de arrastre
+    // bloquea el gesto para poder arrastrar sin bloquear
+    // el scroll normal de la página.
+    tarjeta.style.touchAction = "pan-y";
+
+    // Creamos un asa solo si todavía no existe.
+    if (
+        !tarjeta.querySelector(
+            ".asaArrastreRutina"
+        )
+    ) {
+
+        const asa =
+            document.createElement("span");
+
+        asa.className =
+            "asaArrastreRutina";
+
+        asa.textContent = "☷";
+
+        asa.title =
+            "Mantén pulsado para ordenar";
+
+        asa.style.display = "inline-flex";
+        asa.style.alignItems = "center";
+        asa.style.justifyContent = "center";
+        asa.style.width = "34px";
+        asa.style.height = "34px";
+        asa.style.marginRight = "8px";
+        asa.style.cursor = "grab";
+        asa.style.touchAction = "none";
+        asa.style.userSelect = "none";
+        asa.style.webkitUserSelect = "none";
+        asa.style.fontSize = "22px";
+        asa.style.verticalAlign = "middle";
+
+        tarjeta.insertBefore(
+            asa,
+            tarjeta.firstChild
+        );
+    }
+
+    tarjeta.addEventListener(
+        "pointerdown",
+        function(evento) {
+
+            const esBoton =
+                evento.target.closest("button");
+
+            const esInput =
+                evento.target.closest("input");
+
+            const esSelect =
+                evento.target.closest("select");
+
+            const esTextarea =
+                evento.target.closest("textarea");
+
+            const esAsa =
+                evento.target.closest(
+                    ".asaArrastreRutina"
+                );
+
+            if (
+                esBoton ||
+                esInput ||
+                esSelect ||
+                esTextarea
+            ) {
+                return;
+            }
+
+            // En móvil exigimos pulsar el asa.
+            // En ordenador se puede arrastrar desde la tarjeta.
+            if (
+                evento.pointerType !== "mouse" &&
+                !esAsa
+            ) {
+                return;
+            }
+
+            const estado =
+                estadoArrastreRutina;
+
+            if (estado.tarjeta) {
+                return;
+            }
+
+            estado.tarjeta = tarjeta;
+            estado.punteroId = evento.pointerId;
+            estado.inicioX = evento.clientX;
+            estado.inicioY = evento.clientY;
+            estado.movido = false;
+
+            // Ordenador: empieza inmediatamente.
+            if (
+                evento.pointerType === "mouse"
+            ) {
+                iniciarArrastreRutina(
+                    evento,
+                    tarjeta
+                );
+                return;
+            }
+
+            // Móvil: mantener pulsado 400 ms.
+            estado.temporizador =
+                setTimeout(
+                    function() {
+
+                        estado.temporizador = null;
+
+                        if (
+                            estado.tarjeta !== tarjeta ||
+                            estado.movido
+                        ) {
+                            limpiarArrastreRutina();
+                            return;
+                        }
+
+                        iniciarArrastreRutina(
+                            evento,
+                            tarjeta
+                        );
+                    },
+                    400
+                );
+        }
+    );
+
+
+    tarjeta.addEventListener(
+        "pointermove",
+        function(evento) {
+
+            const estado =
+                estadoArrastreRutina;
+
+            if (
+                estado.tarjeta !== tarjeta
+            ) {
+                return;
+            }
+
+            if (!estado.activo) {
+
+                const diferenciaX =
+                    Math.abs(
+                        evento.clientX -
+                        estado.inicioX
+                    );
+
+                const diferenciaY =
+                    Math.abs(
+                        evento.clientY -
+                        estado.inicioY
+                    );
+
+                if (
+                    diferenciaX > 10 ||
+                    diferenciaY > 10
+                ) {
+
+                    estado.movido = true;
+
+                    if (
+                        estado.temporizador
+                    ) {
+                        clearTimeout(
+                            estado.temporizador
+                        );
+                        estado.temporizador = null;
+                    }
+
+                    estado.tarjeta = null;
+                    estado.punteroId = null;
+                }
+
+                return;
+            }
+
+            if (
+                evento.pointerId !==
+                estado.punteroId
+            ) {
+                return;
+            }
+
+            evento.preventDefault();
+
+            moverTarjetaRutina(
+                evento
+            );
+        }
+    );
+
+
+    tarjeta.addEventListener(
+        "pointerup",
+        async function(evento) {
+
+            const estado =
+                estadoArrastreRutina;
+
+            if (
+                estado.tarjeta !== tarjeta
+            ) {
+                return;
+            }
+
+            if (
+                estado.temporizador
+            ) {
+                clearTimeout(
+                    estado.temporizador
+                );
+                estado.temporizador = null;
+            }
+
+            if (!estado.activo) {
+                estado.tarjeta = null;
+                estado.punteroId = null;
+                return;
+            }
+
+            if (
+                evento.pointerId !==
+                estado.punteroId
+            ) {
+                return;
+            }
+
+            const tarjetaMovida =
+                estado.tarjeta;
+
+            const placeholder =
+                estado.placeholder;
+
+            if (
+                placeholder &&
+                placeholder.parentNode
+            ) {
+                placeholder.parentNode.insertBefore(
+                    tarjetaMovida,
+                    placeholder
+                );
+            }
+
+            try {
+                if (
+                    tarjetaMovida.hasPointerCapture(
+                        evento.pointerId
+                    )
+                ) {
+                    tarjetaMovida.releasePointerCapture(
+                        evento.pointerId
+                    );
+                }
+            } catch (error) {
+                // No hacemos nada.
+            }
+
+            if (placeholder) {
+                placeholder.remove();
+            }
+
+            tarjetaMovida.classList.remove(
+                "arrastrando"
+            );
+
+            tarjetaMovida.style.opacity = "";
+            tarjetaMovida.style.cursor = "grab";
+            tarjetaMovida.style.zIndex = "";
+            tarjetaMovida.style.position = "";
+            tarjetaMovida.style.left = "";
+            tarjetaMovida.style.top = "";
+            tarjetaMovida.style.width = "";
+            tarjetaMovida.style.height = "";
+            tarjetaMovida.style.pointerEvents = "";
+            tarjetaMovida.style.transform = "";
+
+            estado.tarjeta = null;
+            estado.punteroId = null;
+            estado.activo = false;
+            estado.movido = false;
+            estado.placeholder = null;
+
+            const guardado =
+                await guardarOrdenRutina();
+
+            if (!guardado) {
+
+                alert(
+                    "No se ha podido guardar el nuevo orden."
+                );
+
+                await cargarEjerciciosRutina();
+                return;
+            }
+
+            await cargarEjerciciosRutina();
+        }
+    );
+
+
+    tarjeta.addEventListener(
+        "pointercancel",
+        function() {
+            limpiarArrastreRutina();
+        }
+    );
+}
+
+
+// ============================================================
 // CARGAR EJERCICIOS DE LA RUTINA
 // ============================================================
 
@@ -6673,6 +7396,10 @@ async function cargarEjerciciosRutina() {
     if (!ejerciciosRutina) {
         return;
     }
+
+    // Si había un arrastre en curso y recargamos la lista,
+    // lo limpiamos primero.
+    limpiarArrastreRutina();
 
     ejerciciosRutina.innerHTML =
         "Cargando ejercicios...";
@@ -6756,32 +7483,45 @@ async function cargarEjerciciosRutina() {
 
 
             const tarjeta =
-                document.createElement(
-                    "div"
-                );
+                document.createElement("div");
 
-        
-            tarjeta.draggable = true;
-            tarjeta.style.cursor = "grab";
-            tarjeta.style.touchAction = "none";
-            tarjeta.dataset.id = ejercicioRutina.id;
+            tarjeta.className =
+                "ejercicioRutina";
 
+            tarjeta.style.marginBottom =
+                "15px";
+
+            tarjeta.dataset.id =
+                ejercicioRutina.id;
+
+            prepararArrastreRutina(
+                tarjeta
+            );
+
+
+            // ----------------------------------------------------
+            // NOMBRE
+            // ----------------------------------------------------
 
             const nombre =
-                document.createElement(
-                    "h3"
-                );
+                document.createElement("h3");
 
             nombre.textContent =
                 ejercicio
                     ? ejercicio.nombre
                     : "Ejercicio";
 
+            tarjeta.appendChild(
+                nombre
+            );
+
+
+            // ----------------------------------------------------
+            // OBJETIVO
+            // ----------------------------------------------------
 
             const objetivo =
-                document.createElement(
-                    "p"
-                );
+                document.createElement("p");
 
             objetivo.textContent =
                 ejercicioRutina.series_objetivo +
@@ -6789,327 +7529,179 @@ async function cargarEjerciciosRutina() {
                 ejercicioRutina.repeticiones_objetivo +
                 " repeticiones";
 
-
-            tarjeta.appendChild(
-                nombre
-            );
-
             tarjeta.appendChild(
                 objetivo
             );
+
+
             // ----------------------------------------------------
-// BOTÓN ELIMINAR EJERCICIO
-// ----------------------------------------------------
-// ----------------------------------------------------
-// BOTÓN EDITAR EJERCICIO
-// ----------------------------------------------------
+            // EDITAR
+            // ----------------------------------------------------
 
-const botonEditar =
-    document.createElement("button");
+            const botonEditar =
+                document.createElement("button");
 
-botonEditar.type =
-    "button";
+            botonEditar.type =
+                "button";
 
-botonEditar.textContent =
-    "✏️ Editar";
+            botonEditar.textContent =
+                "✏️ Editar";
+
+            botonEditar.addEventListener(
+                "click",
+                async function() {
+
+                    const nuevasSeries =
+                        prompt(
+                            "Número de series:",
+                            ejercicioRutina.series_objetivo
+                        );
+
+                    if (
+                        nuevasSeries === null
+                    ) {
+                        return;
+                    }
 
 
-botonEditar.addEventListener(
-    "click",
-    async function() {
+                    const nuevasRepeticiones =
+                        prompt(
+                            "Número de repeticiones:",
+                            ejercicioRutina.repeticiones_objetivo
+                        );
 
-        const nuevasSeries =
-            prompt(
-                "Número de series:",
-                ejercicioRutina.series_objetivo
+                    if (
+                        nuevasRepeticiones === null
+                    ) {
+                        return;
+                    }
+
+
+                    const series =
+                        Number(nuevasSeries);
+
+                    const repeticiones =
+                        Number(nuevasRepeticiones);
+
+
+                    if (
+                        !Number.isInteger(series) ||
+                        series <= 0 ||
+                        !Number.isInteger(repeticiones) ||
+                        repeticiones <= 0
+                    ) {
+
+                        alert(
+                            "Introduce números válidos."
+                        );
+
+                        return;
+                    }
+
+
+                    const {
+                        error: editarError
+                    } =
+                        await supabaseClient
+                            .from("Rutina_Ejercicios")
+                            .update({
+                                series_objetivo:
+                                    series,
+                                repeticiones_objetivo:
+                                    repeticiones
+                            })
+                            .eq(
+                                "id",
+                                ejercicioRutina.id
+                            );
+
+
+                    if (editarError) {
+
+                        console.error(
+                            "Error editando ejercicio:",
+                            editarError
+                        );
+
+                        alert(
+                            "No se ha podido modificar el ejercicio."
+                        );
+
+                        return;
+                    }
+
+
+                    await cargarEjerciciosRutina();
+                }
             );
 
-        if (nuevasSeries === null) {
-            return;
-        }
-
-
-        const nuevasRepeticiones =
-            prompt(
-                "Número de repeticiones:",
-                ejercicioRutina.repeticiones_objetivo
+            tarjeta.appendChild(
+                botonEditar
             );
 
-        if (nuevasRepeticiones === null) {
-            return;
-        }
+
+            // ----------------------------------------------------
+            // ELIMINAR
+            // ----------------------------------------------------
+
+            const botonEliminar =
+                document.createElement("button");
+
+            botonEliminar.type =
+                "button";
+
+            botonEliminar.textContent =
+                "🗑️ Eliminar";
+
+            botonEliminar.addEventListener(
+                "click",
+                async function() {
+
+                    const confirmar =
+                        confirm(
+                            "¿Quieres eliminar este ejercicio de la rutina?"
+                        );
+
+                    if (!confirmar) {
+                        return;
+                    }
 
 
-        const series =
-            Number(nuevasSeries);
+                    const {
+                        error: eliminarError
+                    } =
+                        await supabaseClient
+                            .from("Rutina_Ejercicios")
+                            .delete()
+                            .eq(
+                                "id",
+                                ejercicioRutina.id
+                            );
 
-        const repeticiones =
-            Number(nuevasRepeticiones);
+
+                    if (eliminarError) {
+
+                        console.error(
+                            "Error eliminando ejercicio:",
+                            eliminarError
+                        );
+
+                        alert(
+                            "No se ha podido eliminar este ejercicio."
+                        );
+
+                        return;
+                    }
 
 
-        if (
-            !Number.isInteger(series) ||
-            series <= 0 ||
-            !Number.isInteger(repeticiones) ||
-            repeticiones <= 0
-        ) {
-
-            alert(
-                "Introduce números válidos."
+                    await cargarEjerciciosRutina();
+                }
             );
 
-            return;
-        }
-
-
-        const {
-            data,
-            error
-        } =
-            await supabaseClient
-                .from("Rutina_Ejercicios")
-                .update({
-                    series_objetivo:
-                        series,
-
-                    repeticiones_objetivo:
-                        repeticiones
-                })
-                .eq(
-                    "id",
-                    ejercicioRutina.id
-                )
-                .select()
-                .single();
-
-
-        if (error) {
-
-            console.error(
-                "Error editando ejercicio:",
-                error
+            tarjeta.appendChild(
+                botonEliminar
             );
 
-            alert(
-                "No se ha podido modificar el ejercicio."
-            );
-
-            return;
-        }
-
-
-        await cargarEjerciciosRutina();
-    }
-);
-
-
-tarjeta.appendChild(
-    botonEditar
-);
-const botonEliminar =
-    document.createElement("button");
-
-botonEliminar.type =
-    "button";
-
-botonEliminar.textContent =
-    "🗑️ Eliminar";
-
-
-botonEliminar.addEventListener(
-    "click",
-    async function() {
-
-        const confirmar =
-            confirm(
-                "¿Quieres eliminar este ejercicio de la rutina?"
-            );
-
-        if (!confirmar) {
-            return;
-        }
-
-
-        const {
-            error: eliminarError
-        } =
-            await supabaseClient
-                .from("Rutina_Ejercicios")
-                .delete()
-                .eq(
-                    "id",
-                    ejercicioRutina.id
-                );
-
-
-        if (eliminarError) {
-
-            console.error(
-                "Error eliminando ejercicio:",
-                eliminarError
-            );
-
-            alert(
-                "No se ha podido eliminar el ejercicio."
-            );
-
-            return;
-        }
-
-
-        await cargarEjerciciosRutina();
-    }
-);
-
-
-tarjeta.appendChild(botonEliminar);
-
-// ----------------------------------------------------
-// ----------------------------------------------------
-// ARRASTRAR EJERCICIOS CON RATÓN Y CON DEDO
-// ----------------------------------------------------
-
-let tarjetaArrastrada = null;
-
-tarjeta.addEventListener("pointerdown", function(evento) {
-
-    // No empezar a arrastrar si pulsamos un botón o un campo
-    if (
-        evento.target.tagName === "BUTTON" ||
-        evento.target.tagName === "INPUT" ||
-        evento.target.tagName === "SELECT"
-    ) {
-        return;
-    }
-
-    tarjetaArrastrada = tarjeta;
-
-    tarjeta.classList.add("arrastrando");
-
-    tarjeta.setPointerCapture(evento.pointerId);
-
-    tarjeta.style.opacity = "0.6";
-    tarjeta.style.cursor = "grabbing";
-});
-
-
-tarjeta.addEventListener("pointermove", function(evento) {
-
-    if (!tarjetaArrastrada) {
-        return;
-    }
-
-    const tarjetas = Array.from(
-        ejerciciosRutina.querySelectorAll(".ejercicioRutina")
-    );
-
-    const otrasTarjetas = tarjetas.filter(function(t) {
-        return t !== tarjetaArrastrada;
-    });
-
-    let tarjetaDestino = null;
-
-    for (let i = 0; i < otrasTarjetas.length; i++) {
-
-        const rect =
-            otrasTarjetas[i].getBoundingClientRect();
-
-        const mitad =
-            rect.top + rect.height / 2;
-
-        if (evento.clientY < mitad) {
-            tarjetaDestino = otrasTarjetas[i];
-            break;
-        }
-    }
-
-    if (tarjetaDestino) {
-
-        ejerciciosRutina.insertBefore(
-            tarjetaArrastrada,
-            tarjetaDestino
-        );
-
-    } else {
-
-        ejerciciosRutina.appendChild(
-            tarjetaArrastrada
-        );
-    }
-});
-
-
-tarjeta.addEventListener("pointerup", async function(evento) {
-
-    if (!tarjetaArrastrada) {
-        return;
-    }
-
-    tarjetaArrastrada.releasePointerCapture(
-        evento.pointerId
-    );
-
-    tarjetaArrastrada.classList.remove("arrastrando");
-
-    tarjetaArrastrada.style.opacity = "1";
-    tarjetaArrastrada.style.cursor = "grab";
-
-    tarjetaArrastrada = null;
-
-
-    // ------------------------------------------------
-    // GUARDAR EL NUEVO ORDEN EN SUPABASE
-    // ------------------------------------------------
-
-    const tarjetas = Array.from(
-        ejerciciosRutina.querySelectorAll(".ejercicioRutina")
-    );
-
-    for (let i = 0; i < tarjetas.length; i++) {
-
-        const id =
-            tarjetas[i].dataset.id;
-
-        const { error } = await supabaseClient
-            .from("Rutina_Ejercicios")
-            .update({
-                orden: i + 1
-            })
-            .eq("id", id);
-
-        if (error) {
-
-            console.error(
-                "Error guardando el orden:",
-                error
-            );
-
-            alert(
-                "No se ha podido guardar el nuevo orden."
-            );
-
-            return;
-        }
-    }
-
-    await cargarEjerciciosRutina();
-});
-
-
-tarjeta.addEventListener("pointercancel", function() {
-
-    if (!tarjetaArrastrada) {
-        return;
-    }
-
-    tarjetaArrastrada.classList.remove("arrastrando");
-
-    tarjetaArrastrada.style.opacity = "1";
-    tarjetaArrastrada.style.cursor = "grab";
-
-    tarjetaArrastrada = null;
-
-});
 
             ejerciciosRutina.appendChild(
                 tarjeta
@@ -7117,6 +7709,7 @@ tarjeta.addEventListener("pointercancel", function() {
         }
     );
 }
+
 
 // ============================================================
 // VOLVER A LA LISTA DE RUTINAS
