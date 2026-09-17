@@ -1177,17 +1177,39 @@ async function anadirEjercicioASesion() {
 
 
             titulo.textContent =
-                nombre;
+    nombre;
 
-            textoResumen.textContent =
-                nombre +
-                " — 0 series";
+textoResumen.textContent =
+    nombre +
+    " — 0 series";
 
 
-            // Cerramos los demás ejercicios.
-            cerrarOtrosEjercicios(
-                bloque
-            );
+// --------------------------------------------------------
+// RECUPERAR ÚLTIMO ENTRENAMIENTO DEL EJERCICIO
+// --------------------------------------------------------
+
+const seriesAnteriores =
+    await obtenerSeriesUltimaSesionEjercicio(
+        Number(ejercicioId)
+    );
+
+
+if (
+    seriesAnteriores.length > 0
+) {
+
+    inputPeso.value =
+        seriesAnteriores[0].peso;
+
+    inputReps.value =
+        seriesAnteriores[0].repeticiones;
+}
+
+
+// Cerramos los demás ejercicios.
+cerrarOtrosEjercicios(
+    bloque
+);
         }
     );
 
@@ -1339,16 +1361,32 @@ async function anadirEjercicioASesion() {
             );
 
 
-            inputPeso.value =
-                "";
+            inputPeso.value = peso;
 
-            inputReps.value =
-                "";
+inputReps.value = repeticiones;
 
-            inputPeso.focus();
+inputPeso.focus();
         }
     );
+inputPeso.addEventListener(
+    "keydown",
+    function(evento) {
+        if (evento.key === "Enter") {
+            evento.preventDefault();
+            inputReps.focus();
+        }
+    }
+);
 
+inputReps.addEventListener(
+    "keydown",
+    function(evento) {
+        if (evento.key === "Enter") {
+            evento.preventDefault();
+            botonGuardarSerie.click();
+        }
+    }
+);
 
     ejerciciosSesion.appendChild(
         bloque
@@ -2518,6 +2556,28 @@ async function crearBloqueEjercicioRecuperado(
         formulario
     );
 
+    // --------------------------------------------------------
+// BOTÓN GUARDAR EJERCICIO
+// --------------------------------------------------------
+
+const botonGuardarEjercicio =
+    document.createElement(
+        "button"
+    );
+
+botonGuardarEjercicio.type =
+    "button";
+
+botonGuardarEjercicio.textContent =
+    "✅ Guardar ejercicio";
+
+botonGuardarEjercicio.style.marginTop =
+    "10px";
+
+contenido.appendChild(
+    botonGuardarEjercicio
+);
+
 
     // --------------------------------------------------------
     // QUITAR
@@ -2740,7 +2800,479 @@ async function crearBloqueEjercicioRecuperado(
     return bloque;
 }
 
+// ============================================================
+// CARGAR ÚLTIMAS SERIES DEL EJERCICIO
+// ============================================================
 
+async function obtenerSeriesUltimaSesionEjercicio(
+    ejercicioId
+) {
+
+    const {
+        data: usuarioData,
+        error: usuarioError
+    } =
+        await supabaseClient.auth.getUser();
+
+    if (
+        usuarioError ||
+        !usuarioData.user
+    ) {
+        return [];
+    }
+
+
+    const {
+        data: sesiones,
+        error: sesionesError
+    } =
+        await supabaseClient
+            .from("Sesiones")
+            .select(
+                "id, created_at"
+            )
+            .eq(
+                "usuario_id",
+                usuarioData.user.id
+            )
+            .order(
+                "created_at",
+                {
+                    ascending: false
+                }
+            )
+            .limit(50);
+
+
+    if (
+        sesionesError ||
+        !sesiones ||
+        sesiones.length === 0
+    ) {
+        return [];
+    }
+
+
+    const idsSesiones =
+        sesiones
+            .map(
+                function(sesion) {
+                    return sesion.id;
+                }
+            );
+
+
+    const {
+        data: relaciones,
+        error: relacionesError
+    } =
+        await supabaseClient
+            .from("Sesion_Ejercicios")
+            .select(
+                "id, sesion_id, ejercicio_id"
+            )
+            .in(
+                "sesion_id",
+                idsSesiones
+            )
+            .eq(
+                "ejercicio_id",
+                Number(ejercicioId)
+            );
+
+
+    if (
+        relacionesError ||
+        !relaciones ||
+        relaciones.length === 0
+    ) {
+        return [];
+    }
+
+
+    let relacionAnterior =
+        null;
+
+
+    for (
+    const sesion of sesiones
+) {
+
+    // No utilizar la sesión que está
+    // actualmente en curso.
+    if (
+        Number(sesion.id) ===
+        Number(sesionActualId)
+    ) {
+        continue;
+    }
+
+
+    relacionAnterior =
+        relaciones.find(
+            function(relacion) {
+
+                return Number(
+                    relacion.sesion_id
+                ) ===
+                Number(
+                    sesion.id
+                );
+
+            }
+        );
+
+
+    if (
+        relacionAnterior
+    ) {
+        break;
+    }
+}
+
+
+    if (
+        !relacionAnterior
+    ) {
+        return [];
+    }
+
+
+    const {
+        data: series,
+        error: seriesError
+    } =
+        await supabaseClient
+            .from("Series")
+            .select(
+                "id, numero_serie, peso, repeticiones"
+            )
+            .eq(
+                "sesion_ejercicio_id",
+                relacionAnterior.id
+            )
+            .order(
+                "numero_serie",
+                {
+                    ascending: true
+                }
+            );
+
+
+    if (
+        seriesError
+    ) {
+
+        console.error(
+            "Error cargando series anteriores:",
+            seriesError
+        );
+
+        return [];
+    }
+
+
+    return series || [];
+}
+// ============================================================
+// COMPARAR EJERCICIO CON LA ÚLTIMA VEZ
+// ============================================================
+
+async function mostrarMejorasEjercicio(
+    ejercicioSesionId,
+    ejercicioId,
+    nombre
+) {
+
+    const {
+        data: seriesActuales,
+        error: errorActuales
+    } =
+        await supabaseClient
+            .from("Series")
+            .select(
+                "peso, repeticiones"
+            )
+            .eq(
+                "sesion_ejercicio_id",
+                Number(
+                    ejercicioSesionId
+                )
+            )
+            .order(
+                "numero_serie",
+                {
+                    ascending: true
+                }
+            );
+
+
+    if (
+        errorActuales
+    ) {
+
+        console.error(
+            "Error obteniendo series actuales:",
+            errorActuales
+        );
+
+        return;
+    }
+
+
+    const seriesAnteriores =
+        await obtenerSeriesUltimaSesionEjercicio(
+            Number(ejercicioId)
+        );
+
+
+    // --------------------------------------------------------
+    // SI NO HAY ENTRENAMIENTO ANTERIOR
+    // --------------------------------------------------------
+
+    if (
+        !seriesAnteriores ||
+        seriesAnteriores.length === 0
+    ) {
+
+        alert(
+            "🏋️ " +
+            nombre +
+            "\n\n" +
+            "Primer entrenamiento registrado de este ejercicio.\n\n" +
+            "¡A partir de ahora podremos comparar tu progreso!"
+        );
+
+        return;
+    }
+
+
+    // --------------------------------------------------------
+    // CALCULAR DATOS ACTUALES
+    // --------------------------------------------------------
+
+    const pesoMaximoActual =
+        Math.max(
+            ...seriesActuales.map(
+                function(serie) {
+                    return Number(
+                        serie.peso
+                    );
+                }
+            )
+        );
+
+
+    const repeticionesActuales =
+        seriesActuales.reduce(
+            function(total, serie) {
+
+                return total +
+                    Number(
+                        serie.repeticiones
+                    );
+
+            },
+            0
+        );
+
+
+    const volumenActual =
+        seriesActuales.reduce(
+            function(total, serie) {
+
+                return total +
+                    (
+                        Number(
+                            serie.peso
+                        ) *
+                        Number(
+                            serie.repeticiones
+                        )
+                    );
+
+            },
+            0
+        );
+
+
+    // --------------------------------------------------------
+    // CALCULAR DATOS ANTERIORES
+    // --------------------------------------------------------
+
+    const pesoMaximoAnterior =
+        Math.max(
+            ...seriesAnteriores.map(
+                function(serie) {
+                    return Number(
+                        serie.peso
+                    );
+                }
+            )
+        );
+
+
+    const repeticionesAnteriores =
+        seriesAnteriores.reduce(
+            function(total, serie) {
+
+                return total +
+                    Number(
+                        serie.repeticiones
+                    );
+
+            },
+            0
+        );
+
+
+    const volumenAnterior =
+        seriesAnteriores.reduce(
+            function(total, serie) {
+
+                return total +
+                    (
+                        Number(
+                            serie.peso
+                        ) *
+                        Number(
+                            serie.repeticiones
+                        )
+                    );
+
+            },
+            0
+        );
+
+
+    // --------------------------------------------------------
+    // DIFERENCIAS
+    // --------------------------------------------------------
+
+    const diferenciaPeso =
+        pesoMaximoActual -
+        pesoMaximoAnterior;
+
+
+    const diferenciaReps =
+        repeticionesActuales -
+        repeticionesAnteriores;
+
+
+    const diferenciaVolumen =
+        volumenActual -
+        volumenAnterior;
+
+
+    let mensaje =
+        "🏋️ " +
+        nombre +
+        "\n\n";
+
+
+    mensaje +=
+        "ÚLTIMA VEZ\n" +
+        seriesAnteriores.length +
+        " series · " +
+        pesoMaximoAnterior +
+        " kg máximo · " +
+        repeticionesAnteriores +
+        " reps totales\n\n";
+
+
+    mensaje +=
+        "HOY\n" +
+        seriesActuales.length +
+        " series · " +
+        pesoMaximoActual +
+        " kg máximo · " +
+        repeticionesActuales +
+        " reps totales\n\n";
+
+
+    mensaje +=
+        "📈 CAMBIOS\n";
+
+
+    if (
+        diferenciaPeso > 0
+    ) {
+
+        mensaje +=
+            "⬆️ Peso máximo: +" +
+            diferenciaPeso +
+            " kg\n";
+
+    } else if (
+        diferenciaPeso < 0
+    ) {
+
+        mensaje +=
+            "⬇️ Peso máximo: " +
+            diferenciaPeso +
+            " kg\n";
+
+    } else {
+
+        mensaje +=
+            "➡️ Peso máximo: igual\n";
+    }
+
+
+    if (
+        diferenciaReps > 0
+    ) {
+
+        mensaje +=
+            "⬆️ Repeticiones: +" +
+            diferenciaReps +
+            "\n";
+
+    } else if (
+        diferenciaReps < 0
+    ) {
+
+        mensaje +=
+            "⬇️ Repeticiones: " +
+            diferenciaReps +
+            "\n";
+
+    } else {
+
+        mensaje +=
+            "➡️ Repeticiones: igual\n";
+    }
+
+
+    if (
+        diferenciaVolumen > 0
+    ) {
+
+        mensaje +=
+            "⬆️ Volumen: +" +
+            diferenciaVolumen +
+            " kg\n";
+
+    } else if (
+        diferenciaVolumen < 0
+    ) {
+
+        mensaje +=
+            "⬇️ Volumen: " +
+            diferenciaVolumen +
+            " kg\n";
+
+    } else {
+
+        mensaje +=
+            "➡️ Volumen: igual\n";
+    }
+
+
+    alert(
+        mensaje
+    );
+}
 // ============================================================
 // CARGAR SERIES RECUPERADAS
 // ============================================================
@@ -6431,6 +6963,214 @@ async function cargarRutinas() {
         }
     );
 }
+// ============================================================
+// INICIAR ENTRENAMIENTO DESDE UNA RUTINA
+// ============================================================
+
+async function iniciarRutinaDesdeDetalle() {
+
+    if (sesionActualId) {
+
+        alert(
+            "Ya tienes un entrenamiento activo. Finalízalo antes de iniciar una rutina nueva."
+        );
+
+        return;
+    }
+
+    if (!rutinaActualId) {
+
+        alert(
+            "No hay ninguna rutina seleccionada."
+        );
+
+        return;
+    }
+
+    const {
+        data: usuarioData,
+        error: usuarioError
+    } =
+        await supabaseClient.auth.getUser();
+
+    if (
+        usuarioError ||
+        !usuarioData.user
+    ) {
+
+        alert(
+            "Debes iniciar sesión."
+        );
+
+        return;
+    }
+
+    const {
+        data: ejerciciosRutinaBD,
+        error: ejerciciosError
+    } =
+        await supabaseClient
+            .from("Rutina_Ejercicios")
+            .select(
+                "id, ejercicio_id, orden, series_objetivo, repeticiones_objetivo"
+            )
+            .eq(
+                "rutina_id",
+                rutinaActualId
+            )
+            .order(
+                "orden",
+                {
+                    ascending: true
+                }
+            );
+
+    if (ejerciciosError) {
+
+        console.error(
+            "Error cargando la rutina para iniciar el entrenamiento:",
+            ejerciciosError
+        );
+
+        alert(
+            "No se pudo cargar la rutina."
+        );
+
+        return;
+    }
+
+    if (
+        !ejerciciosRutinaBD ||
+        ejerciciosRutinaBD.length === 0
+    ) {
+
+        alert(
+            "Esta rutina todavía no tiene ejercicios."
+        );
+
+        return;
+    }
+
+    const {
+        data: sesionCreada,
+        error: sesionError
+    } =
+        await supabaseClient
+            .from("Sesiones")
+            .insert([
+                {
+                    usuario_id:
+                        usuarioData.user.id
+                }
+            ])
+            .select()
+            .single();
+
+    if (sesionError || !sesionCreada) {
+
+        console.error(
+            "Error creando la sesión desde la rutina:",
+            sesionError
+        );
+
+        alert(
+            "No se pudo iniciar el entrenamiento."
+        );
+
+        return;
+    }
+
+    const nuevasRelaciones =
+        ejerciciosRutinaBD.map(
+            function(ejercicioRutina) {
+
+                return {
+                    sesion_id:
+                        sesionCreada.id,
+
+                    ejercicio_id:
+                        ejercicioRutina.ejercicio_id,
+
+                    orden:
+                        ejercicioRutina.orden
+                };
+            }
+        );
+
+    const {
+        data: ejerciciosSesionBD,
+        error: relacionesError
+    } =
+        await supabaseClient
+            .from("Sesion_Ejercicios")
+            .insert(
+                nuevasRelaciones
+            )
+            .select(
+                "id, sesion_id, ejercicio_id, orden"
+            );
+
+    if (relacionesError) {
+
+        console.error(
+            "Error añadiendo los ejercicios de la rutina a la sesión:",
+            relacionesError
+        );
+
+        alert(
+            "No se pudo cargar la rutina en el entrenamiento."
+        );
+
+        return;
+    }
+
+    sesionActualId =
+        sesionCreada.id;
+
+    localStorage.setItem(
+        "sesionActualId",
+        String(
+            sesionActualId
+        )
+    );
+
+    actualizarBotonModificarSesion();
+
+    ejerciciosSesion.innerHTML =
+        "";
+
+    const relacionesOrdenadas =
+        (ejerciciosSesionBD || [])
+            .slice()
+            .sort(
+                function(a, b) {
+                    return Number(a.orden) - Number(b.orden);
+                }
+            );
+
+    for (
+        const ejercicioBD
+        of relacionesOrdenadas
+    ) {
+
+        const bloque =
+            await crearBloqueEjercicioRecuperado(
+                ejercicioBD
+            );
+
+        ejerciciosSesion.appendChild(
+            bloque
+        );
+    }
+
+    mostrarPantalla(
+        pantallaEntrenamientos
+    );
+
+    alert(
+        "🏋️ Rutina cargada. ¡Buen entrenamiento!"
+    );
+}
 
 // ============================================================
 // ABRIR UNA RUTINA
@@ -6457,6 +7197,23 @@ async function abrirRutina(rutina) {
         "📋 " + rutina.nombre;
 
     await cargarEjerciciosRutina();
+        const botonIniciarRutina =
+        document.createElement("button");
+
+    botonIniciarRutina.type =
+        "button";
+
+    botonIniciarRutina.textContent =
+        "▶️ Empezar entrenamiento";
+
+    botonIniciarRutina.addEventListener(
+        "click",
+        iniciarRutinaDesdeDetalle
+    );
+
+    ejerciciosRutina.prepend(
+        botonIniciarRutina
+    );
 }
 
 // ============================================================
