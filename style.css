@@ -1440,3 +1440,615 @@ tr:hover td {
         transition-duration: 0.01ms !important;
     }
 }
+
+
+/* ============================================================
+   MEJORAS MI GYM — EXPERIENCIA DE ENTRENAMIENTO
+   ============================================================ */
+
+#pantallaEntrenamientos > h2 {
+    display: none;
+}
+
+#pantallaEntrenamientos::before {
+    content: "Bienvenido";
+    display: block;
+    margin-top: 8px;
+    color: var(--text);
+    font-size: 27px;
+    font-weight: 750;
+    letter-spacing: -0.5px;
+    text-align: center;
+}
+
+#pantallaEntrenamientos::after {
+    content: "";
+    display: block;
+    width: 38px;
+    height: 3px;
+    margin: 8px auto 0;
+    background: var(--blue);
+    border-radius: 10px;
+}
+
+#iniciarEntrenamiento {
+    width: 195px;
+    height: 195px;
+    margin: 120px auto 55px;
+
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 10px;
+
+    color: var(--text);
+    background: transparent;
+    border: 2px solid var(--blue);
+    border-radius: 50%;
+
+    box-shadow:
+        0 0 0 8px rgba(59, 130, 246, 0.05),
+        0 10px 30px rgba(0, 0, 0, 0.25);
+}
+
+#iniciarEntrenamiento:hover {
+    color: var(--text);
+    background: var(--blue-soft);
+    border-color: var(--blue-hover);
+    box-shadow:
+        0 0 0 10px rgba(59, 130, 246, 0.06),
+        0 14px 34px rgba(0, 0, 0, 0.30);
+}
+
+#iniciarEntrenamiento span {
+    color: var(--blue-hover);
+    font-size: 58px;
+    font-weight: 300;
+    line-height: 1;
+}
+
+#iniciarEntrenamiento small {
+    max-width: 130px;
+    color: var(--text-soft);
+    font-size: 13px;
+    font-weight: 650;
+    line-height: 1.25;
+    text-align: center;
+}
+
+#estadoEntrenamiento {
+    margin: 10px 0 16px;
+    padding: 13px 14px;
+
+    display: flex;
+    flex-direction: column;
+    gap: 3px;
+
+    background:
+        linear-gradient(
+            135deg,
+            rgba(59, 130, 246, 0.12),
+            rgba(59, 130, 246, 0.04)
+        );
+
+    border: 1px solid var(--blue-border);
+    border-radius: var(--radius);
+}
+
+#tituloEntrenamientoActivo {
+    color: var(--text);
+    font-size: 15px;
+}
+
+#metaEntrenamientoActivo {
+    color: var(--text-soft);
+    font-size: 12px;
+    font-weight: 650;
+}
+
+#anadirEjercicio,
+#cancelarSesion,
+#guardarSesion {
+    min-height: 48px;
+}
+
+#cancelarSesion {
+    color: var(--text-soft);
+    background: transparent;
+    border-color: var(--border);
+}
+
+#cancelarSesion:hover {
+    color: var(--red);
+    background: var(--red-soft);
+    border-color: rgba(239, 68, 68, 0.3);
+}
+
+/* ============================================================
+   EJERCICIOS Y SERIES — MOBILE FIRST
+   ============================================================ */
+
+#ejerciciosSesion {
+    gap: 14px;
+}
+
+.bloqueEjercicioSesion {
+    position: relative;
+    overflow: hidden;
+}
+
+.bloqueEjercicioSesion .contenidoEjercicio > h3 {
+    margin: 0 0 10px;
+    font-size: 19px;
+}
+
+.bloqueEjercicioSesion .selectEjercicioSesion {
+    margin-bottom: 10px;
+}
+
+.musculosSesion {
+    padding: 8px 10px;
+    color: var(--text-soft);
+    background: rgba(255, 255, 255, 0.015);
+    border-radius: 8px;
+}
+
+.musculosSesion strong {
+    font-size: 12px;
+}
+
+.musculosSesion p {
+    margin: 4px 0 0;
+    font-size: 12px;
+}
+
+.contadorSeries {
+    margin: 11px 0 7px;
+    color: var(--blue-hover);
+    font-size: 12px;
+    font-weight: 750;
+}
+
+.referenciaUltimaSesion,
+.objetivoRutinaActivo {
+    margin: 9px 0;
+    padding: 9px 10px;
+    color: var(--text-soft);
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    font-size: 12px;
+}
+
+.objetivoRutinaActivo {
+    color: var(--blue-hover);
+    background: var(--blue-soft);
+    border-color: var(--blue-border);
+    font-weight: 700;
+}
+
+.referenciaUltimaSesion strong {
+    display: block;
+    margin-bottom: 3px;
+    color: var(--text);
+    font-size: 12px;
+}
+
+.listaSeries {
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+    margin: 9px 0;
+}
+
+.serieGuardada {
+    min-height: 46px;
+    padding: 8px 9px;
+
+    display: grid;
+    grid-template-columns: 38px minmax(0, 1fr) auto;
+    align-items: center;
+    gap: 8px;
+
+    color: var(--text);
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 8px;
+}
+
+.serieNumero {
+    color: var(--text-muted);
+    font-size: 11px;
+    font-weight: 750;
+}
+
+.serieDatos {
+    min-width: 0;
+    color: var(--text);
+    font-size: 14px;
+    font-weight: 700;
+    white-space: nowrap;
+}
+
+.accionesSerie {
+    display: flex;
+    gap: 3px;
+}
+
+.accionesSerie button {
+    width: 36px;
+    min-height: 34px;
+    padding: 6px;
+    margin: 0;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    background: transparent;
+    border-color: transparent;
+}
+
+.accionesSerie button:hover {
+    background: var(--surface-3);
+    border-color: var(--border);
+}
+
+.formularioSerie {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 8px;
+    margin-top: 10px;
+}
+
+.formularioSerie input {
+    min-height: 50px;
+    font-size: 16px;
+    font-weight: 650;
+}
+
+.formularioSerie button {
+    grid-column: 1 / -1;
+    width: 100%;
+    min-height: 48px;
+    margin: 0;
+    color: #ffffff;
+    background: var(--blue);
+    border-color: var(--blue);
+}
+
+.formularioSerie button:hover {
+    color: #ffffff;
+    background: var(--blue-dark);
+    border-color: var(--blue-dark);
+}
+
+.bloqueEjercicioSesion .resumenEjercicio {
+    display: flex !important;
+    align-items: center;
+    flex-wrap: wrap;
+    gap: 6px;
+}
+
+.bloqueEjercicioSesion .resumenEjercicio strong {
+    flex: 1;
+    min-width: 150px;
+    color: var(--text);
+}
+
+.bloqueEjercicioSesion .resumenEjercicio button {
+    min-height: 36px;
+    margin: 0;
+    padding: 7px 10px;
+}
+
+/* ============================================================
+   HISTORIAL
+   ============================================================ */
+
+.tarjetaSesion {
+    padding: 15px;
+    background: var(--surface-2);
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    box-shadow: var(--shadow-sm);
+}
+
+.tarjetaSesion h3 {
+    margin-bottom: 5px;
+}
+
+.resumenSesion {
+    margin-bottom: 10px;
+    color: var(--text-muted);
+    font-size: 12px;
+}
+
+.contenidoHistorialSesion {
+    margin-top: 12px;
+    padding-top: 12px;
+    border-top: 1px solid var(--border);
+}
+
+.historialEjercicioTitulo {
+    margin-top: 12px;
+    padding: 8px 10px;
+    color: var(--text);
+    background: var(--surface);
+    border-left: 3px solid var(--blue);
+    border-radius: 5px;
+    font-weight: 700;
+}
+
+.historialEjercicioTitulo:first-child {
+    margin-top: 0;
+}
+
+.historialSeries {
+    padding: 7px 10px;
+    color: var(--text-soft);
+    font-size: 13px;
+}
+
+.historialSeries > div {
+    padding: 4px 0;
+}
+
+.botonEliminarSesion {
+    margin-top: 10px;
+    color: var(--text-soft);
+    background: transparent;
+    border-color: var(--border);
+}
+
+.botonEliminarSesion:hover {
+    color: var(--red);
+    background: var(--red-soft);
+    border-color: rgba(239, 68, 68, 0.3);
+}
+
+/* ============================================================
+   RUTINAS — ASA MÓVIL
+   ============================================================ */
+
+.ayudaRutinaMovil {
+    margin: -8px 0 13px;
+    color: var(--text-muted);
+    font-size: 12px;
+}
+
+.ejercicioRutina {
+    position: relative;
+    overflow: hidden;
+}
+
+.ejercicioRutina .asaArrastreRutina {
+    flex: 0 0 auto;
+    width: 36px;
+    height: 36px;
+    margin-right: 8px;
+    color: var(--text-muted);
+    background: var(--surface-3);
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    cursor: grab;
+    touch-action: none;
+    user-select: none;
+    -webkit-user-select: none;
+}
+
+.ejercicioRutina .asaArrastreRutina:active {
+    cursor: grabbing;
+}
+
+.ejercicioRutina.arrastrando {
+    box-shadow: 0 16px 36px rgba(0, 0, 0, 0.40);
+    border-color: var(--blue-border);
+}
+
+.placeholderEjercicioRutina {
+    min-height: 70px;
+    background: rgba(59, 130, 246, 0.05);
+    border: 1px dashed var(--blue-border);
+    border-radius: var(--radius);
+}
+
+/* ============================================================
+   PROGRESO — CONTROLES Y GRÁFICAS
+   ============================================================ */
+
+#filtroSeriesMusculares {
+    margin-bottom: 13px;
+    padding: 10px;
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 8px;
+}
+
+#filtroSeriesMusculares strong {
+    display: block;
+    margin-bottom: 6px;
+    font-size: 12px;
+}
+
+#selectorPeriodoSeries {
+    margin-bottom: 8px;
+}
+
+#rangoPersonalizadoSeries {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 7px;
+}
+
+#rangoPersonalizadoSeries label {
+    grid-column: span 1;
+    margin: 0;
+}
+
+#rangoPersonalizadoSeries input {
+    min-height: 42px;
+}
+
+#aplicarRangoSeries {
+    margin-top: 8px;
+}
+
+#contenedorGraficaVolumen,
+#contenedorGraficaPR,
+#contenedorGraficaSesiones {
+    min-height: 240px;
+    padding: 10px;
+}
+
+#mensajeVolumen,
+#mensajePR {
+    padding: 5px 0;
+}
+
+/* ============================================================
+   TEMPORIZADOR
+   ============================================================ */
+
+#temporizadorDescanso {
+    width: min(92vw, 370px) !important;
+    padding: 14px !important;
+    background: rgba(20, 20, 20, 0.98) !important;
+    border: 1px solid var(--border-light) !important;
+    border-radius: 14px !important;
+    box-shadow: 0 18px 48px rgba(0, 0, 0, 0.50) !important;
+    backdrop-filter: blur(12px);
+    -webkit-backdrop-filter: blur(12px);
+}
+
+#tiempoDescanso {
+    font-variant-numeric: tabular-nums;
+}
+
+/* ============================================================
+   RESPONSIVE — AJUSTES FINALES
+   ============================================================ */
+
+@media (max-width: 600px) {
+
+    #pantallaEntrenamientos::before {
+        margin-top: 4px;
+        font-size: 25px;
+    }
+
+    #iniciarEntrenamiento {
+        width: 195px;
+        height: 195px;
+        margin: 120px auto 55px;
+    }
+
+    #estadoEntrenamiento {
+        margin-bottom: 14px;
+    }
+
+    .formularioSerie {
+        grid-template-columns: 1fr 1fr;
+    }
+
+    .serieGuardada {
+        grid-template-columns: 34px minmax(0, 1fr) auto;
+    }
+
+    .serieDatos {
+        font-size: 13px;
+    }
+
+    #rangoPersonalizadoSeries {
+        grid-template-columns: 1fr;
+    }
+}
+
+@media (max-width: 380px) {
+
+    #iniciarEntrenamiento {
+        width: 185px;
+        height: 185px;
+        margin: 105px auto 50px;
+    }
+
+    .formularioSerie {
+        grid-template-columns: 1fr;
+    }
+
+    .formularioSerie button {
+        grid-column: auto;
+    }
+}
+/* =========================================
+   MAPA MUSCULAR - PROGRESO
+   ========================================= */
+
+#mapaCuerpoProgreso {
+    margin-top: 25px;
+}
+
+#cuerpoMuscular {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 20px;
+}
+
+.vistaCuerpo {
+    width: 100%;
+    display: flex;
+    justify-content: center;
+}
+
+#svgCuerpo {
+    width: min(100%, 300px);
+    height: auto;
+    display: block;
+}
+
+.zonaCuerpo {
+    stroke: #202938;
+    stroke-width: 2;
+}
+
+.zonaNeutra {
+    fill: #252d3a;
+}
+
+.zonaMusculo {
+    fill: #344154;
+    cursor: pointer;
+    transition:
+        fill 0.2s ease,
+        transform 0.2s ease,
+        filter 0.2s ease;
+    transform-box: fill-box;
+    transform-origin: center;
+}
+
+.zonaMusculo:hover {
+    fill: #3f78d8;
+    filter: brightness(1.15);
+}
+
+.zonaMusculo:active {
+    transform: scale(0.97);
+}
+
+#datosMusculoSeleccionado {
+    width: 100%;
+    max-width: 360px;
+    padding: 15px;
+    border: 1px solid #273244;
+    background: #161d28;
+    border-radius: 12px;
+    text-align: center;
+    color: #b8c2d1;
+}
+/* Músculo seleccionado */
+
+.zonaMusculo.musculoSeleccionado {
+    fill: #3f78d8;
+    stroke: #69a0ff;
+    stroke-width: 3;
+    filter: brightness(1.2);
+}

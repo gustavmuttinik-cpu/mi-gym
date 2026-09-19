@@ -17,6 +17,525 @@
         href="style.css"
     >
 
+
+
+
+<style>
+/* ============================================================
+   MUSCLEMAP — CUERPO FOTOREALISTA
+   ============================================================ */
+#muscleMapViewer {
+    width: 100%;
+    margin-top: 14px;
+}
+
+.muscleMapStage {
+    position: relative;
+    width: min(100%, 520px);
+    margin: 0 auto;
+    overflow: hidden;
+    border-radius: 16px;
+    background: #111;
+    border: 1px solid rgba(255,255,255,.08);
+}
+
+#muscleMapImage {
+    display: block;
+    width: 100%;
+    height: auto;
+    filter: grayscale(1) brightness(.82) contrast(1.08);
+}
+
+#muscleMapSvg {
+    position: absolute;
+    inset: 0;
+    width: 100%;
+    height: 100%;
+    overflow: visible;
+}
+
+.muscleMapZona {
+    fill: rgba(59,130,246,.02);
+    stroke: rgba(96,165,250,.10);
+    stroke-width: 2;
+    vector-effect: non-scaling-stroke;
+    cursor: pointer;
+    transition: fill .18s ease, stroke .18s ease, filter .18s ease;
+}
+
+.muscleMapZona.mapaIntensidad0 {
+    fill: rgba(59,130,246,.22);
+    stroke: rgba(96,165,250,.55);
+}
+
+.muscleMapZona {
+    fill-opacity: .58;
+    stroke-width: 2;
+    vector-effect: non-scaling-stroke;
+}
+
+.muscleMapZona:hover,
+.muscleMapZona:focus {
+    stroke: rgba(255,255,255,.95);
+    stroke-width: 3;
+    outline: none;
+    filter: drop-shadow(0 0 6px rgba(255,255,255,.35));
+}
+
+.muscleMapZona.seleccionado {
+    stroke: rgba(255,255,255,1);
+    stroke-width: 4;
+    filter: drop-shadow(0 0 9px rgba(255,255,255,.55));
+}
+
+.muscleMapLeyenda {
+    margin: 12px auto 0;
+    width: min(100%, 520px);
+    padding: 10px 12px;
+    box-sizing: border-box;
+    border-radius: 12px;
+    background: rgba(17,24,39,.72);
+    border: 1px solid rgba(255,255,255,.08);
+}
+
+.muscleMapLeyendaTitulo {
+    display: flex;
+    justify-content: space-between;
+    gap: 10px;
+    margin-bottom: 7px;
+    color: rgba(255,255,255,.72);
+    font-size: .76rem;
+}
+
+.muscleMapLeyendaBarra {
+    height: 10px;
+    border-radius: 999px;
+    background: linear-gradient(
+        90deg,
+        #3b82f6 0%,
+        #6366f1 25%,
+        #a855f7 50%,
+        #f97316 75%,
+        #ef4444 100%
+    );
+    box-shadow: 0 0 8px rgba(255,255,255,.08);
+}
+
+
+
+.botonGraficaDesplegable {
+    width: 100%;
+    min-height: 52px;
+    padding: 12px 15px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 12px;
+    border: 1px solid rgba(255,255,255,.08);
+    border-radius: 14px;
+    background: rgba(17,24,39,.72);
+    color: inherit;
+    font: inherit;
+    font-weight: 700;
+    text-align: left;
+    cursor: pointer;
+    transition: background .2s ease, border-color .2s ease;
+}
+
+.botonGraficaDesplegable:hover {
+    background: rgba(31,41,55,.88);
+    border-color: rgba(255,255,255,.15);
+}
+
+.iconoDesplegable {
+    font-size: 1.25rem;
+    line-height: 1;
+}
+
+.contenidoGraficaDesplegable {
+    padding-top: 12px;
+}
+
+.cabeceraSeriesMusculo {
+    text-align: center;
+    margin-bottom: 12px;
+}
+.cabeceraSeriesMusculo h3 { margin-bottom: 5px; }
+.cabeceraSeriesMusculo p { margin-top: 0; opacity: .72; }
+
+#filtroSeriesMusculares {
+    margin: 0 auto 14px;
+    width: min(100%, 520px);
+}
+#filtroSeriesMusculares select { width: 100%; }
+
+#rangoPersonalizadoSeries {
+    display: grid;
+    grid-template-columns: auto 1fr auto 1fr;
+    gap: 8px;
+    align-items: center;
+    margin-top: 9px;
+}
+#rangoPersonalizadoSeries input {
+    width: 100%;
+    box-sizing: border-box;
+}
+#aplicarRangoSeries {
+    margin-top: 9px;
+    width: 100%;
+}
+
+#muscleMapViewer {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+}
+#muscleMapViewer .controlesVistaCuerpo {
+    display: flex;
+    justify-content: center;
+    gap: 8px;
+    margin-top: 12px;
+}
+
+.botonListaMusculos {
+    width: min(100%, 520px);
+    margin: 14px auto 0;
+    min-height: 50px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 10px;
+    border-radius: 14px;
+}
+.botonListaMusculos span { font-size: 1.35rem; }
+
+.listaGruposMuscularesColapsable {
+    width: min(100%, 520px);
+    margin: 10px auto 0;
+}
+.listaGruposMuscularesColapsable .grupoMuscular {
+    margin-bottom: 8px;
+}
+
+#datosMusculoSeleccionado {
+    width: min(100%, 520px);
+    margin: 10px auto 0;
+    min-height: 52px;
+}
+
+.desgloseMusculosMapa {
+    margin-top: 9px;
+    border-top: 1px solid rgba(255,255,255,.08);
+    padding-top: 7px;
+}
+.filaMusculoMapa {
+    display: flex;
+    justify-content: space-between;
+    gap: 15px;
+    padding: 7px 0;
+}
+.filaMusculoMapa span:last-child {
+    font-weight: 700;
+    white-space: nowrap;
+}
+
+#datosMusculoSeleccionado {
+    min-height: 52px;
+}
+
+@media (max-width: 600px) {
+    .muscleMapStage {
+        width: min(100%, 430px);
+    }
+}
+
+/* =========================================================
+   INTERFAZ PROGRESO — DISEÑO COMPACTO
+   ========================================================= */
+
+/* Botón de cerrar sesión: pequeño, redondo y arriba a la derecha */
+#aplicacion {
+    position: relative;
+}
+
+#cerrarSesion {
+    position: absolute;
+    top: 8px;
+    right: 8px;
+    width: 38px;
+    height: 38px;
+    min-width: 38px;
+    padding: 0;
+    border-radius: 50%;
+    font-size: 0;
+    line-height: 1;
+    z-index: 20;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+#cerrarSesion::before {
+    content: "↪";
+    font-size: 1.05rem;
+}
+
+/* Dejamos el usuario en una línea discreta */
+#usuarioActual {
+    margin: 2px 46px 8px 0;
+    font-size: .76rem;
+    opacity: .62;
+}
+
+/* La semana ocupa mucho menos espacio */
+#calendarioSemana {
+    padding: 10px 12px !important;
+    margin-bottom: 8px !important;
+}
+
+#calendarioSemana h3 {
+    margin: 0 0 7px !important;
+    font-size: 1rem !important;
+}
+
+#diasSemana {
+    display: grid !important;
+    grid-template-columns: repeat(7, minmax(0, 1fr));
+    gap: 5px !important;
+    margin: 0 !important;
+}
+
+#diasSemana > * {
+    min-height: 48px !important;
+    padding: 5px 2px !important;
+    margin: 0 !important;
+    border-radius: 9px !important;
+    font-size: .72rem !important;
+}
+
+#entrenamientosSemana {
+    margin: 7px 0 !important;
+    font-size: .82rem !important;
+}
+
+#verCalendario {
+    margin: 0 !important;
+    min-height: 36px !important;
+    padding: 7px 11px !important;
+    font-size: .78rem !important;
+}
+
+/* El título de Progreso también ocupa menos */
+#pantallaProgreso > h2 {
+    margin: 4px 0 8px !important;
+    font-size: 1.35rem !important;
+}
+
+/* Menos espacio alrededor del mapa */
+#progresoMusculos {
+    padding-top: 8px !important;
+}
+
+#mapaCuerpoProgreso {
+    padding-top: 4px !important;
+}
+
+.cabeceraSeriesMusculo {
+    margin-bottom: 7px !important;
+}
+
+.cabeceraSeriesMusculo h3 {
+    margin: 0 0 2px !important;
+    font-size: 1rem !important;
+}
+
+.cabeceraSeriesMusculo p {
+    margin: 0 !important;
+    font-size: .72rem !important;
+}
+
+/* En móvil el muñeco cabe entero en pantalla */
+@media (max-width: 600px) {
+
+    #muscleMapViewer .muscleMapStage {
+        width: min(100%, 300px) !important;
+    }
+
+    #muscleMapViewer .controlesVistaCuerpo {
+        margin-top: 7px !important;
+    }
+
+    #muscleMapViewer .botonVistaCuerpo {
+        min-height: 34px !important;
+        padding: 6px 13px !important;
+        font-size: .78rem !important;
+    }
+
+    .muscleMapLeyenda {
+        margin-top: 7px !important;
+        padding: 7px 9px !important;
+    }
+
+    #datosMusculoSeleccionado {
+        margin-top: 7px !important;
+    }
+
+    #filtroSeriesMusculares {
+        margin-bottom: 8px !important;
+    }
+}
+
+/* =========================================================
+   CABECERA Y PROGRESO — MODO ULTRACOMPACTO
+   ========================================================= */
+
+#aplicacion {
+    position: relative;
+}
+
+/* Botón cerrar sesión paralelo al título Mi Gym */
+#cerrarSesion {
+    position: fixed !important;
+    top: 8px !important;
+    right: 10px !important;
+    width: 34px !important;
+    height: 34px !important;
+    min-width: 34px !important;
+    padding: 0 !important;
+    margin: 0 !important;
+    border-radius: 50% !important;
+    background: #ef4444 !important;
+    border-color: #ef4444 !important;
+    color: #fff !important;
+    font-size: 0 !important;
+    line-height: 1 !important;
+    z-index: 1000 !important;
+    display: flex !important;
+    align-items: center;
+    justify-content: center;
+}
+
+#cerrarSesion::before {
+    content: "↪";
+    font-size: 1rem;
+    font-weight: 800;
+}
+
+#usuarioActual {
+    margin: 0 42px 4px 0 !important;
+    font-size: .68rem !important;
+    opacity: .5 !important;
+}
+
+/* El título y calendario comparten la misma línea */
+#pantallaProgreso {
+    position: relative;
+}
+
+#pantallaProgreso > h2 {
+    margin: 2px 0 7px !important;
+    padding-right: 145px !important;
+    font-size: 1.28rem !important;
+    line-height: 34px !important;
+}
+
+#verCalendario {
+    position: absolute !important;
+    top: 0 !important;
+    right: 0 !important;
+    min-height: 32px !important;
+    height: 32px !important;
+    margin: 0 !important;
+    padding: 5px 9px !important;
+    border-radius: 9px !important;
+    font-size: .68rem !important;
+    white-space: nowrap;
+}
+
+/* El bloque semanal queda reducido a los 7 días */
+#calendarioSemana {
+    padding: 5px 6px !important;
+    margin: 0 0 7px !important;
+}
+
+/* Quitamos "Esta semana" */
+#calendarioSemana h3 {
+    display: none !important;
+}
+
+/* Quitamos "1 entrenamiento" */
+#entrenamientosSemana {
+    display: none !important;
+}
+
+/* Los siete días ocupan prácticamente solo una línea */
+#diasSemana {
+    display: grid !important;
+    grid-template-columns: repeat(7, minmax(0, 1fr));
+    gap: 4px !important;
+    margin: 0 !important;
+}
+
+#diasSemana > * {
+    min-height: 38px !important;
+    height: 38px !important;
+    box-sizing: border-box;
+    padding: 4px 1px !important;
+    margin: 0 !important;
+    border-radius: 8px !important;
+    font-size: .68rem !important;
+    display: flex !important;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+}
+
+/* El número queda justo debajo de la letra */
+#diasSemana > * > div:first-child {
+    line-height: 13px;
+    font-size: .68rem;
+}
+
+#diasSemana > * > div:nth-child(2) {
+    line-height: 16px;
+    font-size: .78rem;
+    font-weight: 700;
+}
+
+/* El antiguo punto/fuego ya no ocupa espacio */
+#diasSemana > * > .marcaEntrenamiento,
+#diasSemana > * > .sinEntrenamiento {
+    display: none !important;
+}
+
+/* Día entrenado: naranja tipo Strava */
+#diasSemana > .diaEntrenado,
+#diasSemana > *:has(.marcaEntrenamiento) {
+    background: #fc4c02 !important;
+    color: #fff !important;
+}
+
+/* Aún más compacto en móvil */
+@media (max-width: 600px) {
+    #pantallaProgreso > h2 {
+        padding-right: 132px !important;
+        font-size: 1.18rem !important;
+    }
+
+    #verCalendario {
+        max-width: 125px;
+        overflow: hidden;
+        text-overflow: ellipsis;
+    }
+
+    #diasSemana > * {
+        min-height: 36px !important;
+        height: 36px !important;
+    }
+}
+
+</style>
+
 </head>
 
 
@@ -89,6 +608,32 @@
             <h2>Sesión actual</h2>
 
 
+            <!-- INICIAR ENTRENAMIENTO -->
+
+            <button id="iniciarEntrenamiento">
+                <span>+</span>
+                <small>Inicia tu entrenamiento</small>
+            </button>
+
+
+            <!-- ESTADO DEL ENTRENAMIENTO ACTIVO -->
+
+            <div
+                id="estadoEntrenamiento"
+                style="display: none;"
+            >
+
+                <strong id="tituloEntrenamientoActivo">
+                    🏋️ Entrenamiento activo
+                </strong>
+
+                <span id="metaEntrenamientoActivo">
+                    0 ejercicios · 0 series · 00:00
+                </span>
+
+            </div>
+
+
             <!-- EJERCICIOS DE LA SESIÓN -->
 
             <div id="ejerciciosSesion"></div>
@@ -106,15 +651,16 @@
 
             <br><br>
 
+            <!-- CANCELAR SESIÓN -->
 
-            <!-- MODIFICAR SESIÓN -->
-
-            <button id="modificarSesion">
-                ✏️ Modificar sesión actual
+            <button id="cancelarSesion">
+                ❌ Cancelar sesión actual
             </button>
 
 
             <br><br>
+
+
 
 
             <!-- GUARDAR SESIÓN -->
@@ -241,6 +787,10 @@
         </button>
 
         <h3 id="tituloRutina"></h3>
+
+        <p class="ayudaRutinaMovil">
+            Mantén pulsada el asa ☷ para cambiar el orden.
+        </p>
 
         <div id="ejerciciosRutina"></div>
 
@@ -408,43 +958,52 @@
 
             <div id="progresoMusculos">
 
-                <h3>
-                    💪 Series por grupo muscular
-                </h3>
+<div id="mapaCuerpoProgreso">
 
+    <div class="cabeceraSeriesMusculo">
+        <h3>💪 Series por músculo</h3>
+        <p>Consulta tus series según el periodo que elijas.</p>
+    </div>
 
-                <p>
-                    Aquí podrás ver cuántas series
-                    has hecho de cada grupo muscular.
-                </p>
+    <div id="filtroSeriesMusculares"></div>
 
+    <div id="muscleMapViewer" aria-label="Mapa muscular interactivo">
+        <div class="muscleMapStage">
+            <img id="muscleMapImage" src="muscle_map/bodies/male-front.webp" alt="Cuerpo masculino frontal">
+            <svg id="muscleMapSvg" viewBox="0 0 1024 1536" aria-hidden="true"></svg>
+        </div>
 
-                <!--
-                    Los grupos principales serán:
+        <div class="controlesVistaCuerpo" role="group" aria-label="Vista del cuerpo">
+            <button type="button" class="botonVistaCuerpo activo" id="vistaFrontal">Frontal</button>
+            <button type="button" class="botonVistaCuerpo" id="vistaPosterior">Posterior</button>
+        </div>
+    </div>
 
-                    Gemelos
-                    Cuádriceps
-                    Bíceps femoral
-                    Abdominales
-                    Pecho
-                    Espalda
-                    Bíceps
-                    Tríceps
-                    Antebrazo
-                    Glúteo
-                    Hombro
+    <div class="muscleMapLeyenda" aria-label="Escala de intensidad muscular">
+        <div class="muscleMapLeyendaTitulo">
+            <span>Menos series</span>
+            <span>Más series</span>
+        </div>
+        <div class="muscleMapLeyendaBarra"></div>
+    </div>
 
-                    Al pulsar uno se mostrarán
-                    los músculos pertenecientes
-                    a ese grupo.
-                -->
+    <div id="datosMusculoSeleccionado">
+        <strong>Selecciona un músculo</strong>
+        <span>Selecciona un grupo del muñeco para ver sus músculos individuales.</span>
+    </div>
 
-                <div id="listaGruposMusculares"></div>
+    <button type="button" id="botonMostrarListaMusculos" class="botonListaMusculos">
+        <span>＋</span>
+        <strong>Series por grupo muscular</strong>
+    </button>
 
+    <div id="listaGruposMusculares" class="listaGruposMuscularesColapsable" style="display:none;"></div>
 
-                <div id="detalleGrupoMuscular"></div>
+    <div id="detalleGrupoMuscular"></div>
 
-            </div>
+</div>
+
+</div>
 
 
 
@@ -454,44 +1013,54 @@
 
             <div id="progresoVolumen">
 
-                <h3>
-                    📊 Progreso de volumen
-                </h3>
-
-
-                <p>
-                    Selecciona un ejercicio para
-                    ver cómo ha evolucionado su
-                    volumen a lo largo de tus sesiones.
-                </p>
-
-
-                <select id="selectorEjercicioVolumen">
-
-                    <option value="">
-                        Selecciona un ejercicio
-                    </option>
-
-                </select>
-
-
-                <div id="mensajeVolumen"></div>
-
+                <button
+                    type="button"
+                    class="botonGraficaDesplegable"
+                    id="toggleGraficaVolumen"
+                    aria-expanded="false"
+                    aria-controls="contenidoGraficaVolumen"
+                >
+                    <span>📊 Progreso de volumen</span>
+                    <span class="iconoDesplegable">＋</span>
+                </button>
 
                 <div
-                    id="contenedorGraficaVolumen"
-                    style="width: 100%;"
+                    id="contenidoGraficaVolumen"
+                    class="contenidoGraficaDesplegable"
+                    hidden
                 >
 
-                    <canvas
-                        id="graficaVolumen"
+                    <p>
+                        Selecciona un ejercicio para
+                        ver cómo ha evolucionado su
+                        volumen a lo largo de tus sesiones.
+                    </p>
+
+                    <select id="selectorEjercicioVolumen">
+
+                        <option value="">
+                            Selecciona un ejercicio
+                        </option>
+
+                    </select>
+
+                    <div id="mensajeVolumen"></div>
+
+                    <div
+                        id="contenedorGraficaVolumen"
+                        style="width: 100%;"
                     >
-                    </canvas>
+
+                        <canvas
+                            id="graficaVolumen"
+                        >
+                        </canvas>
+
+                    </div>
 
                 </div>
 
             </div>
-
 
 
             <!-- ================================================= -->
@@ -500,43 +1069,53 @@
 
             <div id="progresoPR">
 
-                <h3>
-                    🏆 Progreso de PR
-                </h3>
-
-
-                <p>
-                    Aquí podrás ver la evolución
-                    de tus mejores marcas.
-                </p>
-
-
-                <select id="selectorEjercicioPR">
-
-                    <option value="">
-                        Selecciona un ejercicio
-                    </option>
-
-                </select>
-
-
-                <div id="mensajePR"></div>
-
+                <button
+                    type="button"
+                    class="botonGraficaDesplegable"
+                    id="toggleGraficaPR"
+                    aria-expanded="false"
+                    aria-controls="contenidoGraficaPR"
+                >
+                    <span>🏆 Progreso de PR</span>
+                    <span class="iconoDesplegable">＋</span>
+                </button>
 
                 <div
-                    id="contenedorGraficaPR"
-                    style="width: 100%;"
+                    id="contenidoGraficaPR"
+                    class="contenidoGraficaDesplegable"
+                    hidden
                 >
 
-                    <canvas
-                        id="graficaPR"
+                    <p>
+                        Aquí podrás ver la evolución
+                        de tus mejores marcas.
+                    </p>
+
+                    <select id="selectorEjercicioPR">
+
+                        <option value="">
+                            Selecciona un ejercicio
+                        </option>
+
+                    </select>
+
+                    <div id="mensajePR"></div>
+
+                    <div
+                        id="contenedorGraficaPR"
+                        style="width: 100%;"
                     >
-                    </canvas>
+
+                        <canvas
+                            id="graficaPR"
+                        >
+                        </canvas>
+
+                    </div>
 
                 </div>
 
             </div>
-
 
 
             <!-- ================================================= -->
@@ -621,7 +1200,19 @@
     <!-- APP.JS -->
     <!-- ================================================= -->
 
-    <script src="app.js"></script>
+    <!-- ================================================= -->
+<!-- BODY MUSCLES: MAPA ANATÓMICO -->
+<!-- ================================================= -->
+
+
+
+<script src="musclemap-data.js"></script>
+<script src="app.js"></script>
+
+
+
+
+
 
 </body>
 
